@@ -188,7 +188,7 @@ export default function AuctionDetailPage() {
         <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: PURPLE, marginBottom: 8 }}>
           Auction #{auctionId.toString()} · {statusText}
         </div>
-        <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 30, fontWeight: 900, color: TEXT, marginBottom: 8 }}>
+        <h1 style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 30, fontWeight: 900, color: TEXT, marginBottom: 8 }}>
           {auction.itemName}
         </h1>
         <p style={{ fontSize: 14, color: MUTED, marginBottom: 28, lineHeight: 1.6 }}>{auction.itemDescription}</p>
@@ -198,19 +198,19 @@ export default function AuctionDetailPage() {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 28 }}>
           <Box>
             <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: MUTED, marginBottom: 6 }}>Bid cap</div>
-            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 900, color: TEXT }}>
+            <div style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 18, fontWeight: 900, color: TEXT }}>
               {Number(formatUnits(auction.bidCap, 6)).toLocaleString()} FXRP
             </div>
           </Box>
           <Box>
             <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: MUTED, marginBottom: 6 }}>Bids</div>
-            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 900, color: TEXT }}>{auction.bidCount.toString()}</div>
+            <div style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 18, fontWeight: 900, color: TEXT }}>{auction.bidCount.toString()}</div>
           </Box>
           <Box>
             <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: MUTED, marginBottom: 6 }}>
               {ended ? "Ended" : "Ends"}
             </div>
-            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 700, color: TEXT }}>
+            <div style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 14, fontWeight: 700, color: TEXT }}>
               {new Date(Number(auction.endTime) * 1000).toLocaleString()}
             </div>
           </Box>

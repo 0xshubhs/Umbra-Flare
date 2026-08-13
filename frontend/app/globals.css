@@ -7,12 +7,24 @@
   --background: #0a0a0c;
   --foreground: #f2f2f4;
   --card: #111114;
+  --card-foreground: #f2f2f4;
+  --popover: #111114;
+  --popover-foreground: #f2f2f4;
+  --primary: #f2f2f4;
+  --primary-foreground: #0a0a0c;
+  --secondary: #1a1a1f;
+  --secondary-foreground: #d8d8dc;
+  --muted: #26262c;
   --muted-foreground: #8a8a92;
   --accent: #FD5299;
   --accent-foreground: #0a0a0c;
   --border: rgba(253,82,153, 0.22);
   --border-strong: rgba(253,82,153, 0.5);
+  --input: #1a1a1f;
+  --ring: #FD5299;
+  --radius: 0rem;
   --destructive: #ff5a5a;
+  --destructive-foreground: #0a0a0c;
   --success: #4ade80;
   --warning: #f0a840;
 }
@@ -21,16 +33,33 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* Display face for the ported editorial sections. */
+  --font-display: "Outfit", var(--font-geist-sans), sans-serif;
 }
 
 body {
@@ -49,4 +78,21 @@ body {
     linear-gradient(to right, rgba(253,82,153, 0.08) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(253,82,153, 0.08) 1px, transparent 1px);
   background-size: 48px 48px;
+}
+
+/* Film-grain overlay used by the ported editorial sections. */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+  scrollbar-width: thin;
+  scrollbar-color: #3d3d44 #0a0a0c;
 }

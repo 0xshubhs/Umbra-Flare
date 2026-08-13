@@ -59,7 +59,7 @@ export default function AuctionsPage() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 16 }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: PURPLE, marginBottom: 8 }}>Auctions</div>
-            <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 32, fontWeight: 900, color: TEXT }}>Sealed-bid, Vickrey</h1>
+            <h1 style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 32, fontWeight: 900, color: TEXT }}>Sealed-bid, Vickrey</h1>
           </div>
           <Link href="/auctions/new" style={{
             height: 40, padding: "0 20px", background: PURPLE, color: BG, fontWeight: 700, fontSize: 13,
@@ -87,7 +87,7 @@ export default function AuctionsPage() {
               }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
                   <div>
-                    <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 20, fontWeight: 800, color: TEXT }}>
+                    <div style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 20, fontWeight: 800, color: TEXT }}>
                       {a.itemName || `Auction #${a.id.toString()}`}
                     </div>
                     <div style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>{a.itemDescription}</div>

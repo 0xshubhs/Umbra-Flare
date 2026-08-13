@@ -36,7 +36,7 @@ export function SideNav() {
         <Link href="/" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textDecoration: "none" }}>
           <span style={{
             width: 34, height: 34, border: `1px solid ${BORDER}`, display: "flex",
-            alignItems: "center", justifyContent: "center", fontFamily: "'Outfit', sans-serif",
+            alignItems: "center", justifyContent: "center", fontFamily: "var(--font-outfit), sans-serif",
             fontWeight: 900, fontSize: 15, color: PURPLE,
           }}>
             U
@@ -98,7 +98,7 @@ export function SideNav() {
         position: "sticky", top: 0, zIndex: 50, height: 56, alignItems: "center",
         padding: "0 20px", borderBottom: `1px solid ${BORDER}`, background: "rgba(10,10,12,0.92)", backdropFilter: "blur(8px)",
       }}>
-        <Link href="/" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 900, fontSize: 16, color: TEXT, textDecoration: "none" }}>Umbra</Link>
+        <Link href="/" style={{ fontFamily: "var(--font-outfit), sans-serif", fontWeight: 900, fontSize: 16, color: TEXT, textDecoration: "none" }}>Umbra</Link>
         <div style={{ display: "flex", gap: 16, marginLeft: 24 }}>
           {NAV_ITEMS.slice(1).map((item) => (
             <Link key={item.href} href={item.href} style={{ fontSize: 12, color: MUTED, textDecoration: "none" }}>{item.label}</Link>

@@ -69,7 +69,7 @@ export default function MyBidsPage() {
       <SideNav />
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "48px 24px", width: "100%" }}>
         <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: PURPLE, marginBottom: 8 }}>My Bids</div>
-        <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 32, fontWeight: 900, color: TEXT, marginBottom: 32 }}>
+        <h1 style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 32, fontWeight: 900, color: TEXT, marginBottom: 32 }}>
           Auctions you&apos;ve bid on
         </h1>
 
@@ -93,7 +93,7 @@ export default function MyBidsPage() {
               }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
                   <div>
-                    <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 20, fontWeight: 800, color: TEXT }}>
+                    <div style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 20, fontWeight: 800, color: TEXT }}>
                       {a.itemName || `Auction #${a.id.toString()}`}
                     </div>
                     <div style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>Seller {a.seller.slice(0, 6)}…{a.seller.slice(-4)}</div>

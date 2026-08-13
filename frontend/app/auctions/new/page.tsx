@@ -41,7 +41,7 @@ export default function CreateAuctionPage() {
       <SideNav />
       <div style={{ maxWidth: 520, margin: "0 auto", padding: "48px 24px", width: "100%" }}>
         <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: PURPLE, marginBottom: 8 }}>New auction</div>
-        <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 28, fontWeight: 900, color: TEXT, marginBottom: 8 }}>Create a sealed-bid auction</h1>
+        <h1 style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 28, fontWeight: 900, color: TEXT, marginBottom: 8 }}>Create a sealed-bid auction</h1>
         <p style={{ fontSize: 13.5, color: MUTED, marginBottom: 32, lineHeight: 1.6 }}>
           Bidders will escrow the bid cap you set here — bidding above it isn&apos;t
           possible, and the escrow amount is the same for everyone, so it never
@@ -50,7 +50,7 @@ export default function CreateAuctionPage() {
 
         {confirmed ? (
           <div style={{ padding: 28, background: PANEL, border: `1px solid ${BORDER}`, textAlign: "center" }}>
-            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 900, color: TEXT, marginBottom: 8 }}>Auction created</div>
+            <div style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 18, fontWeight: 900, color: TEXT, marginBottom: 8 }}>Auction created</div>
             <div style={{ fontSize: 12, color: "#6a6a70", fontFamily: "monospace", wordBreak: "break-all", marginBottom: 20 }}>{txHash}</div>
             <button onClick={() => router.push("/auctions")} style={{
               height: 44, padding: "0 24px", background: PURPLE, border: "none", color: BG, fontWeight: 800, fontSize: 13, cursor: "pointer",

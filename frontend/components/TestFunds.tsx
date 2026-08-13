@@ -69,7 +69,7 @@ export function TestFunds() {
 
         <div style={{ fontSize: 13, color: MUTED }}>
           Balance{" "}
-          <span style={{ color: TEXT, fontWeight: 700, fontFamily: "'Outfit', sans-serif" }}>
+          <span style={{ color: TEXT, fontWeight: 700, fontFamily: "var(--font-outfit), sans-serif" }}>
             {shown} FXRP
           </span>
         </div>
