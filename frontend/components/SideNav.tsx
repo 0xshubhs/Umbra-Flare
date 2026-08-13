@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { AUCTION_ADDRESS, explorerAddress } from "@/lib/contracts";
 
 const PURPLE = "#FD5299";
 const TEXT = "#f2f2f4";
@@ -73,7 +74,15 @@ export function SideNav() {
           })}
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+        {/* Live-network indicator, linked to the verified contract on Flare's
+            Blockscout explorer so the deployment is one click from any page. */}
+        <a
+          href={explorerAddress(AUCTION_ADDRESS) ?? undefined}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={`UmbraAuction ${AUCTION_ADDRESS} — view on Blockscout`}
+          style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, textDecoration: "none" }}
+        >
           <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80" }} />
           <span style={{
             fontFamily: "monospace", fontSize: 8, color: MUTED, letterSpacing: "0.1em",
@@ -81,7 +90,7 @@ export function SideNav() {
           }}>
             COSTON2
           </span>
-        </div>
+        </a>
       </nav>
 
       {/* mobile top bar */}

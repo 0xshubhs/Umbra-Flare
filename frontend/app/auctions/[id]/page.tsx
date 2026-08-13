@@ -8,9 +8,11 @@ import {
 } from "wagmi";
 import { formatUnits, parseUnits } from "viem";
 import { SideNav } from "@/components/SideNav";
+import { TestFunds } from "@/components/TestFunds";
 import { encryptBid } from "@/lib/ecies";
 import {
   AUCTION_ADDRESS, AUCTION_ABI, FXRP_ADDRESS, ERC20_ABI, CONTRACTS_DEPLOYED,
+  explorerAddress,
 } from "@/lib/contracts";
 
 const PURPLE = "#FD5299";
@@ -191,6 +193,8 @@ export default function AuctionDetailPage() {
         </h1>
         <p style={{ fontSize: 14, color: MUTED, marginBottom: 28, lineHeight: 1.6 }}>{auction.itemDescription}</p>
 
+        {auction.status === 0 && !ended && <TestFunds />}
+
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 28 }}>
           <Box>
             <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", color: MUTED, marginBottom: 6 }}>Bid cap</div>
@@ -217,7 +221,14 @@ export default function AuctionDetailPage() {
             <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: PURPLE, marginBottom: 12 }}>Settled</div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
               <span style={{ fontSize: 13, color: MUTED }}>Winner</span>
-              <span style={{ fontSize: 13, fontFamily: "monospace", color: TEXT }}>{auction.winner.slice(0, 6)}…{auction.winner.slice(-4)}</span>
+              {explorerAddress(auction.winner) ? (
+                <a href={explorerAddress(auction.winner)!} target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize: 13, fontFamily: "monospace", color: PURPLE, textDecoration: "underline" }}>
+                  {auction.winner.slice(0, 6)}…{auction.winner.slice(-4)} ↗
+                </a>
+              ) : (
+                <span style={{ fontSize: 13, fontFamily: "monospace", color: TEXT }}>{auction.winner.slice(0, 6)}…{auction.winner.slice(-4)}</span>
+              )}
             </div>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ fontSize: 13, color: MUTED }}>Clearing price (2nd-highest bid)</span>

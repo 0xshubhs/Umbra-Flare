@@ -42,19 +42,48 @@ https://github.com/ayushsingh82/Umbra-Flare
 - **Flare Confidential Compute (FCC)** — `UmbraInstructionSender.sol` is the real production entry point, built against Flare's actual `ITeeExtensionRegistry`/`ITeeMachineRegistry` interfaces (pulled directly from Flare's `fce-extension-scaffold` repo). `extension/` is a real Go FCC extension implementing the `AUCTION` op type (`SUBMIT_BID`, `CLOSE_AUCTION`), structured to match that scaffold's exact package layout.
 - Registering a live TEE machine needs Flare's Coston2 indexer database credentials (obtained by contacting Flare support, per their own getting-started guide) plus governance setup — access this submission doesn't have within the hackathon window. So the interactive demo runs the *identical* decrypt/hold-privately/compute-Vickrey/sign logic locally (`frontend/app/api/tee/*`), verified to produce byte-for-byte compatible signatures with what `UmbraAuction.settle()` verifies. Swapping `trustedTeeSigner` from that local key to the real registered TEE machine address is the entire production cutover — no other code changes.
 
-## What's new
+## What's new, and what pre-dates the hackathon
 
-Everything — this is a from-scratch build for the hackathon: `UmbraAuction.sol` (Vickrey auction lifecycle, 8/8 tests passing), the real FCC interfaces + `UmbraInstructionSender.sol`, the Go extension scaffold, the local TEE simulator, and the full frontend (auctions list/create/detail/my-bids).
+**Built new during the hackathon (all of the substance):**
+
+- `UmbraAuction.sol` — the entire Vickrey auction lifecycle: create, sealed bid
+  with fixed-cap escrow, close, signature-verified settlement, payouts. 8/8 tests.
+- The real FCC integration — `UmbraInstructionSender.sol` against Flare's actual
+  `ITeeExtensionRegistry`/`ITeeMachineRegistry` interfaces, plus `extension/`, a
+  Go FCC extension implementing the `AUCTION` op type.
+- All cryptography — client-side ECIES bid encryption (`lib/ecies.ts`), the TEE
+  simulator that decrypts and computes the Vickrey result (`app/api/tee/*`), and
+  the signing scheme `settle()` verifies.
+- Every auction screen's logic — list, create, detail (bid/close/settle), my-bids,
+  test-funds faucet — and the whole Coston2 deployment + verification.
+
+**Pre-existing, reused and disclosed:** the presentational layer of the landing
+page — the editorial layout language and its animation primitives (scrambling
+and split-flap text, draw-on text, animated noise, smooth scroll) — comes from
+SilentBid, an earlier sealed-bid auction project of ours built Feb–Mar 2026,
+before this hackathon opened. Those components were re-themed to Umbra's palette
+and every word of their copy rewritten for Flare and Confidential Compute, but
+the underlying motion/layout code is not new work and we aren't claiming it as
+such. SilentBid targeted different privacy tech; none of its cryptography,
+contracts, or chain integration is reused here — that is all new, because
+Flare's TEE model shares nothing with what SilentBid used.
 
 ## Smart contracts
 
-Deployed and live on **Flare Testnet Coston2** (chain id 114):
+Deployed and live on **Flare Testnet Coston2** (chain id 114). Both contracts
+are **source-verified on Blockscout** — the code is readable on the explorer:
 
 | Contract | Address |
 |---|---|
-| `UmbraAuction` | [`0x9d3ccbE19D1A6e37A9F67868ae7eE8452069d697`](https://coston2-explorer.flare.network/address/0x9d3ccbE19D1A6e37A9F67868ae7eE8452069d697) |
-| `MockFXRP` (demo settlement token) | [`0x08a25a794639a6cA03b0A7C655B2c36d82fF144a`](https://coston2-explorer.flare.network/address/0x08a25a794639a6cA03b0A7C655B2c36d82fF144a) |
+| `UmbraAuction` | [`0x9d3ccbE19D1A6e37A9F67868ae7eE8452069d697`](https://coston2-explorer.flare.network/address/0x9d3ccbE19D1A6e37A9F67868ae7eE8452069d697) ✓ verified |
+| `MockFXRP` (demo settlement token) | [`0x08a25a794639a6cA03b0A7C655B2c36d82fF144a`](https://coston2-explorer.flare.network/address/0x08a25a794639a6cA03b0A7C655B2c36d82fF144a) ✓ verified |
 | `trustedTeeSigner` | `0xE3Dc334a8689FCFC5e9A7590A7651768630b626D` |
+
+**Two auctions are open for judges to bid on** (#4 Vintage Rolex Submariner,
+#5 Rare Whisky Cask No. 42), running through the judging window. The app has a
+built-in faucet button for test FXRP, and C2FLR for gas comes from
+https://faucet.flare.network/coston2. Auctions #1–#3 are settled and show the
+completed flow with real winners and clearing prices.
 
 **On the settlement token:** the auction is designed for real FXRP and
 `script/Deploy.s.sol` deploys against FTestXRP

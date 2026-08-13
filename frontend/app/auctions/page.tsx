@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useReadContract, useReadContracts } from "wagmi";
 import { formatUnits } from "viem";
 import { SideNav } from "@/components/SideNav";
+import { TestFunds } from "@/components/TestFunds";
 import { AUCTION_ADDRESS, AUCTION_ABI, CONTRACTS_DEPLOYED, STATUS_FROM_ENUM } from "@/lib/contracts";
 
 const PURPLE = "#FD5299";
@@ -67,6 +68,8 @@ export default function AuctionsPage() {
             + Create auction
           </Link>
         </div>
+
+        <TestFunds />
 
         {!CONTRACTS_DEPLOYED ? (
           <div style={{ padding: "12px 16px", background: "rgba(240,168,64,0.1)", border: "1px solid #f0a840", fontSize: 13, color: "#f0a840" }}>

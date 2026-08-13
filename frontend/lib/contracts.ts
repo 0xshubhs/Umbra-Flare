@@ -14,11 +14,14 @@ const CONFIG = {
     rpc: "http://127.0.0.1:8546",
     auction: "0x229e614Bc82229b423921Efdc4C6E498D7876BC1",
     fxrp: "0x45A755B058492558351f188e4362F0546Bc3d140",
+    explorer: "",
   },
   coston2: {
     rpc: "https://coston2-api.flare.network/ext/C/rpc",
     auction: "0x9d3ccbE19D1A6e37A9F67868ae7eE8452069d697",
     fxrp: "0x08a25a794639a6cA03b0A7C655B2c36d82fF144a",
+    // Flare's Coston2 explorer is a Blockscout instance.
+    explorer: "https://coston2-explorer.flare.network",
   },
 } as const;
 
@@ -27,6 +30,15 @@ export const NETWORK: keyof typeof CONFIG = "coston2";
 export const RPC_URL = CONFIG[NETWORK].rpc;
 export const AUCTION_ADDRESS = CONFIG[NETWORK].auction as `0x${string}`;
 export const FXRP_ADDRESS = CONFIG[NETWORK].fxrp as `0x${string}`;
+export const EXPLORER_URL: string = CONFIG[NETWORK].explorer;
+
+/// Blockscout links. Return null on networks with no explorer (anvil), so
+/// callers can omit the link rather than render a dead one.
+export const explorerAddress = (addr: string): string | null =>
+  EXPLORER_URL ? `${EXPLORER_URL}/address/${addr}` : null;
+
+export const explorerTx = (hash: string): string | null =>
+  EXPLORER_URL ? `${EXPLORER_URL}/tx/${hash}` : null;
 
 export const CONTRACTS_DEPLOYED =
   AUCTION_ADDRESS !== "0x0000000000000000000000000000000000000000";
@@ -184,6 +196,20 @@ export const ERC20_ABI = [
     type: "function", name: "decimals",
     inputs: [], outputs: [{ name: "", type: "uint8" }],
     stateMutability: "view",
+  },
+] as const;
+
+/// MockFXRP's open mint, which the real FTestXRP does not have — it only mints
+/// through the FAssets agent pipeline. Exposed in the UI as a test faucet so
+/// anyone evaluating the demo can obtain bidding funds; see FXRP_ADDRESS above.
+export const MOCK_FXRP_ABI = [
+  {
+    type: "function", name: "mint",
+    inputs: [
+      { name: "to", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [], stateMutability: "nonpayable",
   },
 ] as const;
 
