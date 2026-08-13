@@ -1,23 +1,32 @@
 // ── Network switch ──────────────────────────────────────────────────────────
 // "local"   — anvil forking Coston2 (`anvil --fork-url https://coston2-api.flare.network/ext/C/rpc`).
 // "coston2" — the real Flare Testnet Coston2, where the live demo runs.
-export const NETWORK: "local" | "coston2" = "coston2";
+//
+// Both networks settle in a MockFXRP (6 decimals, open mint) rather than the
+// real FTestXRP at 0x0b6A3645c240605887a5532109323A3E12273dc7. FTestXRP only
+// mints through the FAssets agent/collateral pipeline — a direct mint()
+// reverts — so nobody evaluating the demo could obtain bidding funds.
+// UmbraAuction takes its token as a constructor argument, so pointing at the
+// real one is a deploy-time choice (see contracts/script/Deploy.s.sol), not a
+// code change. These MUST stay consistent with the deployed auction's `fxrp`.
+const CONFIG = {
+  local: {
+    rpc: "http://127.0.0.1:8546",
+    auction: "0x229e614Bc82229b423921Efdc4C6E498D7876BC1",
+    fxrp: "0x45A755B058492558351f188e4362F0546Bc3d140",
+  },
+  coston2: {
+    rpc: "https://coston2-api.flare.network/ext/C/rpc",
+    auction: "0x9d3ccbE19D1A6e37A9F67868ae7eE8452069d697",
+    fxrp: "0x08a25a794639a6cA03b0A7C655B2c36d82fF144a",
+  },
+} as const;
 
-export const RPC_URL = NETWORK === "local"
-  ? "http://127.0.0.1:8546"
-  : "https://coston2-api.flare.network/ext/C/rpc";
+export const NETWORK: keyof typeof CONFIG = "coston2";
 
-export const AUCTION_ADDRESS = (
-  NETWORK === "local"
-    ? "0x229e614Bc82229b423921Efdc4C6E498D7876BC1" // local deploy, contracts/script/Deploy.s.sol
-    : "0x9d3ccbE19D1A6e37A9F67868ae7eE8452069d697" // live Coston2 deploy, contracts/script/DeployDemo.s.sol
-) as `0x${string}`;
-
-export const FXRP_ADDRESS = (
-  NETWORK === "local"
-    ? "0x45A755B058492558351f188e4362F0546Bc3d140" // local MockFXRP — mint() freely, unlike the real token
-    : "0x0b6A3645c240605887a5532109323A3E12273dc7" // real FTestXRP on Coston2
-) as `0x${string}`;
+export const RPC_URL = CONFIG[NETWORK].rpc;
+export const AUCTION_ADDRESS = CONFIG[NETWORK].auction as `0x${string}`;
+export const FXRP_ADDRESS = CONFIG[NETWORK].fxrp as `0x${string}`;
 
 export const CONTRACTS_DEPLOYED =
   AUCTION_ADDRESS !== "0x0000000000000000000000000000000000000000";
@@ -96,6 +105,15 @@ export const AUCTION_ABI = [
     type: "function", name: "getBidders",
     inputs: [{ name: "auctionId", type: "uint256" }],
     outputs: [{ name: "", type: "address[]" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function", name: "getBidCiphertext",
+    inputs: [
+      { name: "auctionId", type: "uint256" },
+      { name: "bidder", type: "address" },
+    ],
+    outputs: [{ name: "", type: "bytes" }],
     stateMutability: "view",
   },
   {

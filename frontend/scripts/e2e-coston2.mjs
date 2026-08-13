@@ -99,7 +99,7 @@ for (const [b, amt] of [[bidderA, BID_A], [bidderB, BID_B]]) {
   });
   const j = await res.json();
   if (!res.ok) throw new Error(`TEE submit-bid failed: ${JSON.stringify(j)}`);
-  console.log(`    ${b.address.slice(0, 10)} escrowed ${fx(CAP)} FXRP | ciphertext ${(ct.length - 2) / 2} bytes | TEE accepted (${j.bidsSoFar} bids held)`);
+  console.log(`    ${b.address.slice(0, 10)} escrowed ${fx(CAP)} FXRP | ciphertext ${(ct.length - 2) / 2} bytes | TEE accepted`);
 }
 
 const a0 = await pub.readContract({ address: AUCTION, abi: AUCTION_ABI, functionName: "getAuction", args: [AUCTION_ID] });
