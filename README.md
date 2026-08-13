@@ -6,54 +6,29 @@ Submitting to the **Flare Summer Signal** hackathon's **Confidential Compute App
 
 ## Architecture
 
-```
-┌──────────────────────────────────────────────────────┐
-│                   BIDDER (browser)                   │
-└──────────────────────────────────────────────────────┘
-       │
-       │  encrypt(bidAmount, TEE_PUBLIC_KEY)  [ECIES, secp256k1]
-       ▼
-┌──────────────────────────────────────────────────────┐
-│    UmbraAuction.submitBid(auctionId, ciphertext)     │
-│                                                      │
-│ escrows a FIXED bidCap in FXRP (same for every       │
-│ bidder, so the public escrow amount leaks nothing)   │
-│ stores ciphertext on-chain — public, unreadable      │
-└──────────────────────────────────────────────────────┘
-       │
-       ▼
-┌──────────────────────────────────────────────────────┐
-│ TEE  ·  decrypt & hold privately          [PRIVATE]  │
-│                                                      │
-│ only the TEE's private key can decrypt the bid;      │
-│ plaintext amount lives in enclave memory only,       │
-│ never logged, never returned, never on-chain         │
-└──────────────────────────────────────────────────────┘
-       │  ...auction runs until endTime...
-       ▼
-┌──────────────────────────────────────────────────────┐
-│         UmbraAuction.closeAuction(auctionId)         │
-└──────────────────────────────────────────────────────┘
-       │
-       ▼
-┌──────────────────────────────────────────────────────┐
-│ TEE  ·  compute Vickrey result            [PRIVATE]  │
-│                                                      │
-│ winner = highest bidder                              │
-│ clearingPrice = second-highest bid                   │
-│ (losing bids, and the winner's true bid,             │
-│  are never disclosed — only this pair is)            │
-│ signs (chainId, contract, auctionId, winner, price)  │
-└──────────────────────────────────────────────────────┘
-       │  signed result
-       ▼
-┌──────────────────────────────────────────────────────┐
-│     UmbraAuction.settle(id, winner, price, sig)      │
-│                                                      │
-│ verifies sig against trustedTeeSigner                │
-│ winner pays price to seller, refunded the rest       │
-│ every other bidder refunded in full                  │
-└──────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    Bidder(["Bidder (browser)"]) -->|"encrypt(bidAmount, TEE_PUBLIC_KEY)<br/><sub>ECIES, secp256k1</sub>"| Submit["UmbraAuction.submitBid(auctionId, ciphertext)<br/><sub>escrows a FIXED bidCap in FXRP — same for every</sub><br/><sub>bidder, so the public escrow amount leaks nothing</sub><br/><sub>ciphertext stored on-chain, public but unreadable</sub>"]
+
+    subgraph TEE["Flare Confidential Compute — private, never on-chain"]
+        direction TB
+        Decrypt["decrypt &amp; hold privately<br/><sub>only the TEE's key can decrypt;</sub><br/><sub>plaintext lives in enclave memory only,</sub><br/><sub>never logged, never returned</sub>"]
+        Compute["compute Vickrey result<br/><sub>winner = highest bidder</sub><br/><sub>clearingPrice = second-highest bid</sub><br/><sub>all other amounts stay private forever</sub>"]
+        Decrypt --> Compute
+    end
+
+    Submit -.->|ciphertext| Decrypt
+    Close["UmbraAuction.closeAuction(auctionId)<br/><sub>anyone, once endTime has passed</sub>"] -.-> Compute
+    Compute -->|"sign(chainId, contract, auctionId, winner, price)"| Settle["UmbraAuction.settle(id, winner, price, sig)<br/><sub>verifies sig against trustedTeeSigner</sub><br/><sub>winner pays price to seller, refunded the rest</sub><br/><sub>every other bidder refunded in full</sub>"]
+    Settle --> Payout(["Seller + all bidders paid out"])
+
+    classDef onchain fill:#1a0d18,stroke:#FD5299,color:#eee,stroke-width:1.5px
+    classDef tee fill:#0d1a15,stroke:#4ade80,color:#eee,stroke-width:1.5px
+    classDef actor fill:#111,stroke:#888,color:#eee,stroke-width:1px
+    class Submit,Close,Settle onchain
+    class Decrypt,Compute tee
+    class Bidder,Payout actor
+    style TEE fill:#0a1210,stroke:#4ade80,stroke-width:1px,stroke-dasharray:4 3,color:#4ade80
 ```
 
 ## Why confidential compute, not a normal contract
