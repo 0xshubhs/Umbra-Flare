@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: "/", label: "Home" },
   { href: "/auctions", label: "Auctions" },
   { href: "/auctions/new", label: "Create" },
+  { href: "/my-bids", label: "My Bids" },
 ];
 
 /// Fixed left dot-nav, matching the reference project's editorial layout
