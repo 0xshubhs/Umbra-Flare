@@ -3,15 +3,15 @@
 import Link from "next/link";
 import { useReadContract, useReadContracts } from "wagmi";
 import { formatUnits } from "viem";
-import { NavBar } from "@/components/NavBar";
+import { SideNav } from "@/components/SideNav";
 import { AUCTION_ADDRESS, AUCTION_ABI, CONTRACTS_DEPLOYED, STATUS_FROM_ENUM } from "@/lib/contracts";
 
-const PURPLE = "#b98cf0";
+const PURPLE = "#FD5299";
 const BG = "#0a0a0c";
 const PANEL = "#111114";
 const TEXT = "#f2f2f4";
 const MUTED = "#8a8a92";
-const BORDER = "rgba(185,140,240,0.22)";
+const BORDER = "rgba(253,82,153,0.22)";
 
 type Auction = {
   id: bigint; seller: `0x${string}`; itemName: string; itemDescription: string;
@@ -52,8 +52,8 @@ export default function AuctionsPage() {
   const auctions = useAuctions();
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: BG }}>
-      <NavBar />
+    <div className="md:pl-[84px]" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: BG }}>
+      <SideNav />
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "48px 24px", width: "100%" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 16 }}>
           <div>

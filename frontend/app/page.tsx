@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { NavBar } from "@/components/NavBar";
+import { SideNav } from "@/components/SideNav";
 
-const PURPLE = "#b98cf0";
+const PURPLE = "#FD5299";
 const BG = "#0a0a0c";
 const PANEL = "#111114";
 const TEXT = "#f2f2f4";
 const MUTED = "#8a8a92";
-const BORDER = "rgba(185,140,240,0.22)";
-const BORDER_STRONG = "rgba(185,140,240,0.5)";
+const BORDER = "rgba(253,82,153,0.22)";
+const BORDER_STRONG = "rgba(253,82,153,0.5)";
 
 const STEPS = [
   { num: "01", title: "Bidder encrypts", desc: "Bid amount is ECIES-encrypted client-side to the TEE's public key before it ever leaves the browser." },
@@ -18,8 +18,8 @@ const STEPS = [
 
 export default function Home() {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: BG, fontFamily: "'Inter', system-ui, sans-serif" }}>
-      <NavBar />
+    <div className="md:pl-[84px]" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: BG, fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <SideNav />
 
       {/* Hero */}
       <section style={{ padding: "110px 40px 90px", textAlign: "center" }}>

@@ -7,19 +7,19 @@ import {
   useWaitForTransactionReceipt, usePublicClient,
 } from "wagmi";
 import { formatUnits, parseUnits } from "viem";
-import { NavBar } from "@/components/NavBar";
+import { SideNav } from "@/components/SideNav";
 import { encryptBid } from "@/lib/ecies";
 import {
   AUCTION_ADDRESS, AUCTION_ABI, FXRP_ADDRESS, ERC20_ABI, CONTRACTS_DEPLOYED,
 } from "@/lib/contracts";
 
-const PURPLE = "#b98cf0";
+const PURPLE = "#FD5299";
 const BG = "#0a0a0c";
 const PANEL = "#111114";
 const TEXT = "#f2f2f4";
 const MUTED = "#8a8a92";
-const BORDER = "rgba(185,140,240,0.22)";
-const BORDER_STRONG = "rgba(185,140,240,0.5)";
+const BORDER = "rgba(253,82,153,0.22)";
+const BORDER_STRONG = "rgba(253,82,153,0.5)";
 
 type Auction = {
   id: bigint; seller: `0x${string}`; itemName: string; itemDescription: string;
@@ -159,8 +159,8 @@ export default function AuctionDetailPage() {
 
   if (!CONTRACTS_DEPLOYED) {
     return (
-      <div style={{ minHeight: "100vh", background: BG }}>
-        <NavBar />
+      <div className="md:pl-[84px]" style={{ minHeight: "100vh", background: BG }}>
+        <SideNav />
         <div style={{ maxWidth: 600, margin: "0 auto", padding: 48 }}>
           <Notice tone="warning">UmbraAuction not deployed yet — fill in the address in lib/contracts.ts.</Notice>
         </div>
@@ -170,8 +170,8 @@ export default function AuctionDetailPage() {
 
   if (!auction) {
     return (
-      <div style={{ minHeight: "100vh", background: BG }}>
-        <NavBar />
+      <div className="md:pl-[84px]" style={{ minHeight: "100vh", background: BG }}>
+        <SideNav />
         <div style={{ maxWidth: 600, margin: "0 auto", padding: 48, color: MUTED }}>Loading auction #{auctionId.toString()}…</div>
       </div>
     );
@@ -180,8 +180,8 @@ export default function AuctionDetailPage() {
   const statusText = { 0: ended ? "Ready to close" : "Active", 1: "Closed — awaiting settlement", 2: "Settled" }[auction.status] ?? "Unknown";
 
   return (
-    <div style={{ minHeight: "100vh", background: BG }}>
-      <NavBar />
+    <div className="md:pl-[84px]" style={{ minHeight: "100vh", background: BG }}>
+      <SideNav />
       <div style={{ maxWidth: 640, margin: "0 auto", padding: "48px 24px" }}>
         <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: PURPLE, marginBottom: 8 }}>
           Auction #{auctionId.toString()} · {statusText}

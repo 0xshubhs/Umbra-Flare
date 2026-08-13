@@ -4,16 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseUnits } from "viem";
-import { NavBar } from "@/components/NavBar";
+import { SideNav } from "@/components/SideNav";
 import { AUCTION_ADDRESS, AUCTION_ABI, CONTRACTS_DEPLOYED } from "@/lib/contracts";
 
-const PURPLE = "#b98cf0";
+const PURPLE = "#FD5299";
 const BG = "#0a0a0c";
 const PANEL = "#111114";
 const TEXT = "#f2f2f4";
 const MUTED = "#8a8a92";
-const BORDER = "rgba(185,140,240,0.22)";
-const BORDER_STRONG = "rgba(185,140,240,0.5)";
+const BORDER = "rgba(253,82,153,0.22)";
+const BORDER_STRONG = "rgba(253,82,153,0.5)";
 
 export default function CreateAuctionPage() {
   const { address } = useAccount();
@@ -37,8 +37,8 @@ export default function CreateAuctionPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: BG }}>
-      <NavBar />
+    <div className="md:pl-[84px]" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: BG }}>
+      <SideNav />
       <div style={{ maxWidth: 520, margin: "0 auto", padding: "48px 24px", width: "100%" }}>
         <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: PURPLE, marginBottom: 8 }}>New auction</div>
         <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: 28, fontWeight: 900, color: TEXT, marginBottom: 8 }}>Create a sealed-bid auction</h1>

@@ -35,7 +35,7 @@ const config = createConfig({
 const queryClient = new QueryClient();
 
 const rainbowTheme = darkTheme({
-  accentColor: "#b98cf0",
+  accentColor: "#FD5299",
   accentColorForeground: "#0a0a0c",
   borderRadius: "none",
   fontStack: "system",
