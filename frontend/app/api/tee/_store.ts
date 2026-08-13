@@ -36,19 +36,22 @@ export function closeAndComputeWinner(auctionId: string): { winner: `0x${string}
   }
   closedAuctions.add(auctionId);
 
-  let winner = records[0];
+  // Single pass, order-independent: `winner` is null until the first record
+  // is seen, so that record never gets compared against itself as if it
+  // were already the max (that bug would make clearingPrice equal the
+  // winner's own bid instead of the true second-highest).
+  let winner: BidRecord | null = null;
   let second = 0n;
   for (const r of records) {
-    if (r.amount > winner.amount) {
-      second = winner.amount;
+    if (winner === null || r.amount > winner.amount) {
+      if (winner !== null && winner.amount > second) second = winner.amount;
       winner = r;
     } else if (r.amount > second) {
       second = r.amount;
     }
   }
-  if (records.length === 1) second = 0n;
 
-  return { winner: winner.bidder, clearingPrice: second };
+  return { winner: winner!.bidder, clearingPrice: second };
 }
 
 export function bidCount(auctionId: string): number {

@@ -175,20 +175,22 @@ func (e *Extension) processCloseAuction(action teetypes.Action, df *dataFixed) h
 		return errResult(fmt.Errorf("no bids for auction %s", key))
 	}
 
-	var winner bidRecord
-	var second *big.Int = big.NewInt(0)
-	for _, r := range records {
-		if r.amount.Cmp(winner.amount) > 0 {
-			if winner.amount != nil {
+	// Single pass, order-independent: winner is nil until the first record is
+	// seen, so that record is never compared against itself as if it were
+	// already the max — that bug would make clearingPrice equal the winner's
+	// own bid instead of the true second-highest.
+	var winner *bidRecord
+	second := big.NewInt(0)
+	for i := range records {
+		r := records[i]
+		if winner == nil || r.amount.Cmp(winner.amount) > 0 {
+			if winner != nil && winner.amount.Cmp(second) > 0 {
 				second = winner.amount
 			}
-			winner = r
-		} else if second == nil || r.amount.Cmp(second) > 0 {
+			winner = &r
+		} else if r.amount.Cmp(second) > 0 {
 			second = r.amount
 		}
-	}
-	if len(records) == 1 {
-		second = big.NewInt(0) // sole bidder clears at their reserve, not their bid
 	}
 
 	// Must match UmbraAuction.settle's digest exactly: keccak256(abi.encode(
