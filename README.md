@@ -31,6 +31,63 @@ flowchart TD
     style TEE fill:#0a1210,stroke:#4ade80,stroke-width:1px,stroke-dasharray:4 3,color:#4ade80
 ```
 
+## Live on Coston2
+
+| | |
+|---|---|
+| `UmbraAuction` | [`0x9d3ccbE19D1A6e37A9F67868ae7eE8452069d697`](https://coston2-explorer.flare.network/address/0x9d3ccbE19D1A6e37A9F67868ae7eE8452069d697) |
+| `MockFXRP` (demo token, 6 decimals, open mint) | [`0x08a25a794639a6cA03b0A7C655B2c36d82fF144a`](https://coston2-explorer.flare.network/address/0x08a25a794639a6cA03b0A7C655B2c36d82fF144a) |
+| `trustedTeeSigner` | `0xE3Dc334a8689FCFC5e9A7590A7651768630b626D` |
+
+A full sealed-bid round has been run against this deployment: two encrypted
+bids (600 and 850 FXRP), winner charged **600** — the second price — with
+every payout verified on-chain. Settlement tx
+[`0xd1ee3890…f956f0`](https://coston2-explorer.flare.network/tx/0xd1ee3890a5aca7db3854d06655e9238a3e757811910b5fa8a3435cb1bdf956f0).
+
+## Quick start
+
+**Contracts** (Foundry — `lib/` is not vendored, so install deps first):
+
+```bash
+cd contracts
+forge install foundry-rs/forge-std OpenZeppelin/openzeppelin-contracts
+forge test -vv                      # 8/8, full Vickrey lifecycle
+```
+
+Deploy your own copy (uses a Foundry keystore, so no raw private key on disk;
+fund it from https://faucet.flare.network/coston2 first):
+
+```bash
+TRUSTED_TEE_SIGNER=0x... forge script script/DeployDemo.s.sol \
+  --rpc-url coston2 --account <keystore-name> --broadcast
+```
+
+`DeployDemo.s.sol` uses the mintable `MockFXRP`; `Deploy.s.sol` is the same
+deploy against the real FTestXRP token.
+
+**Frontend + local TEE simulator:**
+
+```bash
+cd frontend
+npm install
+cp .env.example .env.local          # then generate a TEE key, see the file
+npm run dev                         # http://localhost:3000
+```
+
+The app talks to the live Coston2 deployment out of the box (`lib/contracts.ts`,
+`NETWORK = "coston2"`). Connect a wallet on Coston2, mint yourself test FXRP
+from `MockFXRP`, and bid.
+
+**Reproduce the end-to-end proof** (needs `npm run dev` running):
+
+```bash
+node scripts/e2e-coston2.mjs --gen  # make throwaway bidder keys, fund them
+node scripts/e2e-coston2.mjs <auctionId>
+```
+
+It submits two real encrypted bids and asserts the winner, the second-price
+clearing amount, and all three payout balances against the live chain.
+
 ## Why confidential compute, not a normal contract
 
 Calldata and contract storage are public. A plain smart contract sealed-bid
@@ -80,15 +137,24 @@ umbra-flare/
 │   │   ├── interfaces/                 (Flare's real ITeeExtensionRegistry/ITeeMachineRegistry)
 │   │   └── MockFXRP.sol
 │   ├── test/UmbraAuction.t.sol         (8/8 passing, full lifecycle)
-│   └── script/Deploy.s.sol
+│   └── script/
+│       ├── Deploy.s.sol                (against real FTestXRP)
+│       └── DeployDemo.s.sol            (against mintable MockFXRP — the live demo)
 ├── extension/                          (real Go FCC extension, AUCTION op type)
 └── frontend/
     ├── lib/ecies.ts, lib/tee.ts        (client-side bid encryption)
-    └── app/api/tee/                    (local TEE simulator — see its README)
+    ├── app/api/tee/                    (local TEE simulator — see its README)
+    └── scripts/e2e-coston2.mjs         (end-to-end proof against live Coston2)
 ```
 
 ## Network
 
 - **Chain:** Flare Testnet Coston2 (chain id 114)
 - **RPC:** `https://coston2-api.flare.network/ext/C/rpc`
-- **FXRP (FTestXRP):** `0x0b6A3645c240605887a5532109323A3E12273dc7`
+- **Gas faucet:** https://faucet.flare.network/coston2
+- **FXRP (FTestXRP):** `0x0b6A3645c240605887a5532109323A3E12273dc7` — what
+  `Deploy.s.sol` targets. The live demo runs on `MockFXRP` instead (same 6
+  decimals, open `mint()`), because FTestXRP only mints through the FAssets
+  agent/collateral pipeline and a direct `mint()` reverts — which would leave
+  judges with no way to obtain bidding funds. `UmbraAuction` takes the token
+  as a constructor argument and is otherwise identical either way.

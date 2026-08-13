@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# throwaway e2e bidder keys (scripts/e2e-coston2.mjs --gen)
+.bidders.json

@@ -14,7 +14,24 @@ Anyone running a sealed-bid sale where bid privacy matters for the mechanism to 
 
 - App: [fill in deployed URL]
 - Local: `cd frontend && npm install && npm run dev`, browse `/auctions`, create one at `/auctions/new`
-- Verified end-to-end against a real local deployment: real bids, correct Vickrey winner/price, correct on-chain settlement payouts (see repo commit history for the full trace, including a real bug found and fixed during that test)
+
+**Verified end-to-end on live Coston2**, not just locally. Auction #1 on
+`0x9d3c…d697` ran the complete flow with two real bidders:
+
+| | |
+|---|---|
+| bidder A bid | 600 FXRP (encrypted client-side) |
+| bidder B bid | 850 FXRP (encrypted client-side) |
+| TEE result | winner = bidder B, clearing price = **600** |
+| seller received | 600 FXRP |
+| winner refunded | 400 FXRP (bid cap 1000 − price 600) |
+| loser refunded | 1000 FXRP in full |
+| settlement tx | [`0xd1ee3890…f956f0`](https://coston2-explorer.flare.network/tx/0xd1ee3890a5aca7db3854d06655e9238a3e757811910b5fa8a3435cb1bdf956f0) |
+
+The winner bid 850 and paid 600 — the second-highest bid — which is the whole
+point of Vickrey, and neither amount was ever readable on-chain. Reproduce it
+with `node frontend/scripts/e2e-coston2.mjs <auctionId>`, which asserts all
+eight of those properties against the live chain.
 
 ## GitHub
 
@@ -31,9 +48,23 @@ Everything — this is a from-scratch build for the hackathon: `UmbraAuction.sol
 
 ## Smart contracts
 
-- `UmbraAuction`: [fill in address after Coston2 deploy]
-- FXRP (FTestXRP), Coston2: `0x0b6A3645c240605887a5532109323A3E12273dc7`
-- Network: Flare Testnet Coston2 (chain id 114)
+Deployed and live on **Flare Testnet Coston2** (chain id 114):
+
+| Contract | Address |
+|---|---|
+| `UmbraAuction` | [`0x9d3ccbE19D1A6e37A9F67868ae7eE8452069d697`](https://coston2-explorer.flare.network/address/0x9d3ccbE19D1A6e37A9F67868ae7eE8452069d697) |
+| `MockFXRP` (demo settlement token) | [`0x08a25a794639a6cA03b0A7C655B2c36d82fF144a`](https://coston2-explorer.flare.network/address/0x08a25a794639a6cA03b0A7C655B2c36d82fF144a) |
+| `trustedTeeSigner` | `0xE3Dc334a8689FCFC5e9A7590A7651768630b626D` |
+
+**On the settlement token:** the auction is designed for real FXRP and
+`script/Deploy.s.sol` deploys against FTestXRP
+(`0x0b6A3645c240605887a5532109323A3E12273dc7`) unchanged. The public demo
+instead uses `MockFXRP` — same 6 decimals, open `mint()` — because FTestXRP
+can only be minted through the FAssets pipeline (an agent, collateral, and a
+real XRP Ledger payment); calling its `mint()` directly reverts with
+`0x6d5ab9d3`. Requiring that would make the demo untestable for judges. The
+auction contract is token-agnostic, so this is a constructor argument, not a
+code difference.
 
 ## Roadmap
 

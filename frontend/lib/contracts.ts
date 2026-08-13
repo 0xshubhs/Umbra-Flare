@@ -1,8 +1,7 @@
 // ── Network switch ──────────────────────────────────────────────────────────
 // "local"   — anvil forking Coston2 (`anvil --fork-url https://coston2-api.flare.network/ext/C/rpc`).
-// "coston2" — the real Flare Testnet Coston2. Flip once UmbraAuction is
-//             actually deployed there and fill in its address below.
-export const NETWORK: "local" | "coston2" = "local";
+// "coston2" — the real Flare Testnet Coston2, where the live demo runs.
+export const NETWORK: "local" | "coston2" = "coston2";
 
 export const RPC_URL = NETWORK === "local"
   ? "http://127.0.0.1:8546"
@@ -11,7 +10,7 @@ export const RPC_URL = NETWORK === "local"
 export const AUCTION_ADDRESS = (
   NETWORK === "local"
     ? "0x229e614Bc82229b423921Efdc4C6E498D7876BC1" // local deploy, contracts/script/Deploy.s.sol
-    : "0x0000000000000000000000000000000000000000" // TODO: fill in after deploying to real Coston2
+    : "0x9d3ccbE19D1A6e37A9F67868ae7eE8452069d697" // live Coston2 deploy, contracts/script/DeployDemo.s.sol
 ) as `0x${string}`;
 
 export const FXRP_ADDRESS = (
