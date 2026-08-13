@@ -39,10 +39,17 @@ flowchart TD
 | `MockFXRP` (demo token, 6 decimals, open mint) | [`0x08a25a794639a6cA03b0A7C655B2c36d82fF144a`](https://coston2-explorer.flare.network/address/0x08a25a794639a6cA03b0A7C655B2c36d82fF144a) |
 | `trustedTeeSigner` | `0xE3Dc334a8689FCFC5e9A7590A7651768630b626D` |
 
-A full sealed-bid round has been run against this deployment: two encrypted
-bids (600 and 850 FXRP), winner charged **600** — the second price — with
-every payout verified on-chain. Settlement tx
+Both contracts are source-verified, so the code is readable on the explorer.
+
+Four full sealed-bid rounds have been run against this deployment. Each used
+two encrypted bids (600 and 850 FXRP) and charged the winner **600** — the
+second price — with every payout asserted on-chain. First settlement tx:
 [`0xd1ee3890…f956f0`](https://coston2-explorer.flare.network/tx/0xd1ee3890a5aca7db3854d06655e9238a3e757811910b5fa8a3435cb1bdf956f0).
+
+Auctions **#4** and **#5** are open and running through late August, so the
+flow can be exercised end to end from the app. Mint test FXRP with the faucet
+button on any auction page; gas comes from
+https://faucet.flare.network/coston2.
 
 ## Quick start
 
@@ -151,6 +158,22 @@ Two side channels are closed deliberately:
 - `extension/` — the real Go extension implementation (decrypt, hold privately, compute Vickrey, sign), structured to match Flare's scaffold exactly.
 
 **Local stand-in, clearly isolated:** registering a real TEE machine on Coston2 needs Flare's indexer database credentials (obtained by contacting Flare support, per their own getting-started guide) plus a public tunnel and governance setup — access this submission doesn't have. So `UmbraInstructionSender` is written and ready but not wired into the live demo. Instead, `frontend/app/api/tee/*` runs the *same logic* as the real extension locally (see `extension/README.md` and `app/api/tee/README.md` for the exact mapping) so the full flow is genuinely testable end to end.
+
+## On the interface
+
+The visual layer — the editorial layout, its animation primitives, and the
+markup of the auction screens — is adapted from SilentBid, an earlier
+sealed-bid auction project of ours predating this hackathon. It was re-themed
+and its copy rewritten entirely for Flare, but it is not new work and isn't
+presented as such.
+
+Nothing beneath it carried over. SilentBid used fully homomorphic encryption,
+where bids stay encrypted on-chain and revealing them needs a decryption
+oracle plus per-user permits. Umbra's enclave decrypts off-chain and signs the
+result instead, so there is no user-side reveal step, no second key, and no
+permit flow — a losing bidder cannot stall settlement by withholding a reveal.
+The contracts, cryptography, FCC integration, and every wallet interaction on
+these screens were written for this submission.
 
 ## Repository layout
 

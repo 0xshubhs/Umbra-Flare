@@ -7,13 +7,6 @@ import { SideNav } from "@/components/SideNav";
 import { TestFunds } from "@/components/TestFunds";
 import { AUCTION_ADDRESS, AUCTION_ABI, CONTRACTS_DEPLOYED, STATUS_FROM_ENUM } from "@/lib/contracts";
 
-const PURPLE = "#FD5299";
-const BG = "#0a0a0c";
-const PANEL = "#111114";
-const TEXT = "#f2f2f4";
-const MUTED = "#8a8a92";
-const BORDER = "rgba(253,82,153,0.22)";
-
 type Auction = {
   id: bigint; seller: `0x${string}`; itemName: string; itemDescription: string;
   bidCap: bigint; endTime: bigint; status: number; winner: `0x${string}`;
@@ -53,65 +46,117 @@ export default function AuctionsPage() {
   const auctions = useAuctions();
 
   return (
-    <div className="md:pl-[84px]" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: BG }}>
+    <main className="relative min-h-screen bg-background text-foreground">
       <SideNav />
-      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "48px 24px", width: "100%" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 16 }}>
+      <div className="grid-bg fixed inset-0 opacity-30" aria-hidden="true" />
+      <div className="noise-overlay" aria-hidden="true" />
+
+      <section className="relative z-10 py-24 md:py-32 pl-6 pr-6 md:pl-28 md:pr-12">
+        {/* Section header */}
+        <div className="mb-16 flex flex-wrap items-end justify-between gap-8">
           <div>
-            <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: PURPLE, marginBottom: 8 }}>Auctions</div>
-            <h1 style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 32, fontWeight: 900, color: TEXT }}>Sealed-bid, Vickrey</h1>
+            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">01 / Auctions</span>
+            <h1 className="mt-4 font-sans font-black text-5xl md:text-7xl tracking-tight">SEALED-BID, VICKREY</h1>
+            <div className="mt-6 w-12 h-px bg-accent/60" />
+            <p className="mt-6 max-w-md font-mono text-xs text-muted-foreground leading-relaxed">
+              The highest bidder wins and pays the second-highest bid. Bid amounts stay in the enclave.
+            </p>
           </div>
-          <Link href="/auctions/new" style={{
-            height: 40, padding: "0 20px", background: PURPLE, color: BG, fontWeight: 700, fontSize: 13,
-            display: "inline-flex", alignItems: "center", textDecoration: "none",
-          }}>
-            + Create auction
+
+          <Link
+            href="/auctions/new"
+            className="group inline-flex items-center gap-3 border border-accent bg-accent px-6 py-3 font-mono text-[10px] uppercase tracking-[0.3em] text-accent-foreground transition-colors duration-300 hover:bg-transparent hover:text-accent"
+          >
+            Create auction
+            <span className="transition-transform duration-300 group-hover:translate-x-1">&rarr;</span>
           </Link>
         </div>
 
         <TestFunds />
 
         {!CONTRACTS_DEPLOYED ? (
-          <div style={{ padding: "12px 16px", background: "rgba(240,168,64,0.1)", border: "1px solid #f0a840", fontSize: 13, color: "#f0a840" }}>
-            UmbraAuction not deployed yet — fill in the address in <code>lib/contracts.ts</code>.
+          <div className="border border-warning bg-warning/10 p-6">
+            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-warning">Not deployed</span>
+            <p className="mt-3 font-mono text-xs text-warning/90 leading-relaxed">
+              UmbraAuction not deployed yet — fill in the address in{" "}
+              <code className="font-mono text-warning">lib/contracts.ts</code>.
+            </p>
           </div>
         ) : auctions.length === 0 ? (
-          <div style={{ padding: 48, textAlign: "center", background: PANEL, border: `1px solid ${BORDER}`, color: MUTED }}>
-            No auctions yet. <Link href="/auctions/new" style={{ color: PURPLE }}>Create the first one →</Link>
+          <div className="bg-card border border-border/50 p-12 md:p-20 text-center">
+            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+              No auctions yet
+            </span>
+            <div className="mx-auto mt-6 mb-6 w-12 h-px bg-accent/60" />
+            <p className="font-mono text-xs text-muted-foreground leading-relaxed">
+              <Link href="/auctions/new" className="text-accent hover:underline underline-offset-4">
+                Create the first one &rarr;
+              </Link>
+            </p>
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div className="grid gap-6 md:grid-cols-2 md:gap-8">
             {auctions.map((a) => (
-              <Link key={a.id.toString()} href={`/auctions/${a.id.toString()}`} style={{
-                display: "block", padding: "22px 24px", background: PANEL, border: `1px solid ${BORDER}`, textDecoration: "none",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+              <Link
+                key={a.id.toString()}
+                href={`/auctions/${a.id.toString()}`}
+                className="group relative flex h-full flex-col bg-card border border-border/50 p-8 transition-all duration-500 hover:-translate-y-1 hover:border-accent/60"
+              >
+                {/* Card header: issue number + status */}
+                <div className="mb-8 flex items-baseline justify-between gap-4">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                    No. {a.id.toString().padStart(2, "0")}
+                  </span>
+                  <span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-accent">
+                    <span className="w-1.5 h-1.5 bg-current" aria-hidden="true" />
+                    {statusLabel(a.status, a.endTime)}
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h2 className="font-sans font-black text-4xl tracking-tight group-hover:text-accent transition-colors duration-300">
+                  {a.itemName || `Auction #${a.id.toString()}`}
+                </h2>
+
+                {/* Divider line */}
+                <div className="mt-4 mb-6 w-12 h-px bg-accent/60 group-hover:w-full transition-all duration-500" />
+
+                <p className="font-mono text-xs text-muted-foreground leading-relaxed">{a.itemDescription}</p>
+
+                {/* Meta row */}
+                <div className="mt-8 flex flex-wrap items-end gap-10 border-t border-border/30 pt-6">
                   <div>
-                    <div style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 20, fontWeight: 800, color: TEXT }}>
-                      {a.itemName || `Auction #${a.id.toString()}`}
+                    <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                      Bid cap
                     </div>
-                    <div style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>{a.itemDescription}</div>
-                  </div>
-                  <div style={{ display: "flex", gap: 24, fontSize: 12, color: MUTED, flexWrap: "wrap" }}>
-                    <div>
-                      <div style={{ textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 10 }}>Bid cap</div>
-                      <div style={{ color: TEXT, fontWeight: 700 }}>{Number(formatUnits(a.bidCap, 6)).toLocaleString()} FXRP</div>
-                    </div>
-                    <div>
-                      <div style={{ textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 10 }}>Bids</div>
-                      <div style={{ color: TEXT, fontWeight: 700 }}>{a.bidCount.toString()}</div>
-                    </div>
-                    <div>
-                      <div style={{ textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 10 }}>Status</div>
-                      <div style={{ color: PURPLE, fontWeight: 700 }}>{statusLabel(a.status, a.endTime)}</div>
+                    <div className="mt-2 font-sans font-black text-xl tracking-tight">
+                      {Number(formatUnits(a.bidCap, 6)).toLocaleString()}{" "}
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                        FXRP
+                      </span>
                     </div>
                   </div>
+                  <div>
+                    <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                      Bids
+                    </div>
+                    <div className="mt-2 font-sans font-black text-xl tracking-tight">{a.bidCount.toString()}</div>
+                  </div>
+                </div>
+
+                {/* Corner rule, revealed on hover */}
+                <div
+                  className="pointer-events-none absolute top-0 right-0 w-12 h-12 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  aria-hidden="true"
+                >
+                  <div className="absolute top-0 right-0 w-full h-px bg-accent" />
+                  <div className="absolute top-0 right-0 w-px h-full bg-accent" />
                 </div>
               </Link>
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

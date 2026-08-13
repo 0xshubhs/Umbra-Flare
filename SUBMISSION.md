@@ -57,16 +57,23 @@ https://github.com/ayushsingh82/Umbra-Flare
 - Every auction screen's logic — list, create, detail (bid/close/settle), my-bids,
   test-funds faucet — and the whole Coston2 deployment + verification.
 
-**Pre-existing, reused and disclosed:** the presentational layer of the landing
-page — the editorial layout language and its animation primitives (scrambling
-and split-flap text, draw-on text, animated noise, smooth scroll) — comes from
-SilentBid, an earlier sealed-bid auction project of ours built Feb–Mar 2026,
-before this hackathon opened. Those components were re-themed to Umbra's palette
-and every word of their copy rewritten for Flare and Confidential Compute, but
-the underlying motion/layout code is not new work and we aren't claiming it as
-such. SilentBid targeted different privacy tech; none of its cryptography,
-contracts, or chain integration is reused here — that is all new, because
-Flare's TEE model shares nothing with what SilentBid used.
+**Pre-existing, reused and disclosed:** the app's *visual* layer. The editorial
+layout language, its animation primitives (scrambling and split-flap text,
+draw-on text, animated noise, smooth scroll), the landing sections, and the
+markup of the auction screens all come from SilentBid — an earlier sealed-bid
+auction project of ours, built Feb–Mar 2026, before this hackathon opened.
+Every component was re-themed to Umbra's palette and every word of copy
+rewritten for Flare and Confidential Compute, but the underlying motion and
+layout code is not new work and we are not claiming it as such.
+
+What was *not* reusable, and so was written from scratch: SilentBid used
+fully homomorphic encryption, where bids stay encrypted on-chain and revealing
+them needs a decryption oracle plus per-user permits. Umbra uses a TEE, where
+the enclave decrypts off-chain and signs the result. Those models share no
+code — the entire data layer behind these screens is new, and Umbra needs no
+user-side reveal step, no second key, and no permit flow at all. A losing
+bidder therefore cannot stall settlement by refusing to reveal, which is the
+standing weakness of commit-reveal designs.
 
 ## Smart contracts
 
@@ -103,8 +110,10 @@ code difference.
   signature, and that the second price is charged rather than the winner's own bid.
 - **Live-chain:** `frontend/scripts/e2e-coston2.mjs` drives a complete round
   against deployed Coston2 contracts and asserts the winner, the clearing
-  price, and all three payout balances. Two independent rounds have been run
-  and passed (auctions #1 and #2 on `0x9d3c…d697`).
+  price, and all three payout balances. Four independent rounds have been run
+  and passed (auctions #1, #2, #3 and #6 on `0x9d3c…d697`) — including one
+  after the constant-width ciphertext change and one after the full UI port,
+  each re-verified rather than assumed.
 - **Known gap:** a sole bidder currently clears at 0, since there is no second
   bid to price against. Fine for the mechanism, wrong for a real seller — a
   reserve price is the fix, and it's first on the roadmap below.

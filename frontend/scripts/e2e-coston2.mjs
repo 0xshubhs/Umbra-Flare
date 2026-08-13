@@ -111,7 +111,21 @@ if (waitMs > 0) {
   console.log(`\n[2] waiting ${Math.ceil(waitMs / 1000)}s for auction end...`);
   await new Promise((r) => setTimeout(r, waitMs));
 }
-await send(bidderA, { address: AUCTION, abi: AUCTION_ABI, functionName: "closeAuction", args: [AUCTION_ID] });
+
+// closeAuction() gates on block.timestamp, which trails local wall-clock by a
+// block or two, so the first attempt can land a few seconds early and revert
+// with "Auction not ended yet". Retry against the chain's clock rather than ours.
+for (let attempt = 1; ; attempt++) {
+  try {
+    await send(bidderA, { address: AUCTION, abi: AUCTION_ABI, functionName: "closeAuction", args: [AUCTION_ID] });
+    break;
+  } catch (err) {
+    const latest = await pub.getBlock();
+    if (latest.timestamp >= a0.endTime || attempt >= 6) throw err;
+    console.log(`    chain clock still ${Number(a0.endTime - latest.timestamp)}s short, retrying...`);
+    await new Promise((r) => setTimeout(r, 8000));
+  }
+}
 console.log("    closed on-chain (permissionless)\n");
 
 console.log("[3] TEE computes Vickrey result over privately-held bids...");

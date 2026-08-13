@@ -6,13 +6,6 @@ import { formatUnits } from "viem";
 import { SideNav } from "@/components/SideNav";
 import { AUCTION_ADDRESS, AUCTION_ABI, CONTRACTS_DEPLOYED } from "@/lib/contracts";
 
-const PURPLE = "#FD5299";
-const BG = "#0a0a0c";
-const PANEL = "#111114";
-const TEXT = "#f2f2f4";
-const MUTED = "#8a8a92";
-const BORDER = "rgba(253,82,153,0.22)";
-
 type Auction = {
   id: bigint; seller: `0x${string}`; itemName: string; itemDescription: string;
   bidCap: bigint; endTime: bigint; status: number; winner: `0x${string}`;
@@ -55,9 +48,24 @@ function statusLabel(a: Auction, address: `0x${string}` | undefined) {
   if (a.status === 1) return "Awaiting settlement";
   return BigInt(Math.floor(Date.now() / 1000)) >= a.endTime ? "Ready to close" : "Active";
 }
-function statusColor(a: Auction, address: `0x${string}` | undefined) {
-  if (a.status === 2) return a.winner.toLowerCase() === address?.toLowerCase() ? "#4ade80" : "#8a8a92";
-  return PURPLE;
+
+/// Won auctions read green, everything unresolved reads accent, and a loss
+/// reads muted — a loss is a non-event, since the escrow comes back in full.
+function statusClass(a: Auction, address: `0x${string}` | undefined) {
+  if (a.status === 2) {
+    return a.winner.toLowerCase() === address?.toLowerCase() ? "text-success" : "text-muted-foreground";
+  }
+  return "text-accent";
+}
+
+function EmptyState({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="bg-card border border-border/50 p-12 md:p-20 text-center">
+      <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">{label}</span>
+      <div className="mx-auto mt-6 mb-6 w-12 h-px bg-accent/60" />
+      <p className="font-mono text-xs text-muted-foreground leading-relaxed">{children}</p>
+    </div>
+  );
 }
 
 export default function MyBidsPage() {
@@ -65,61 +73,98 @@ export default function MyBidsPage() {
   const auctions = useMyBids(address);
 
   return (
-    <div className="md:pl-[84px]" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: BG }}>
+    <main className="relative min-h-screen bg-background text-foreground">
       <SideNav />
-      <div style={{ maxWidth: 1000, margin: "0 auto", padding: "48px 24px", width: "100%" }}>
-        <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.12em", color: PURPLE, marginBottom: 8 }}>My Bids</div>
-        <h1 style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 32, fontWeight: 900, color: TEXT, marginBottom: 32 }}>
-          Auctions you&apos;ve bid on
-        </h1>
+      <div className="grid-bg fixed inset-0 opacity-30" aria-hidden="true" />
+      <div className="noise-overlay" aria-hidden="true" />
+
+      <section className="relative z-10 py-24 md:py-32 pl-6 pr-6 md:pl-28 md:pr-12">
+        <div className="mb-16">
+          <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-accent">02 / Portfolio</span>
+          <h1 className="mt-4 font-sans font-black text-5xl md:text-7xl tracking-tight">YOUR BIDS</h1>
+          <div className="mt-6 w-12 h-px bg-accent/60" />
+          <p className="mt-6 max-w-md font-mono text-xs text-muted-foreground leading-relaxed">
+            What you bid is never shown here, or anywhere else. Only the outcome is.
+          </p>
+        </div>
 
         {!address ? (
-          <div style={{ padding: 48, textAlign: "center", background: PANEL, border: `1px solid ${BORDER}`, color: MUTED }}>
-            Connect your wallet to see your bids.
-          </div>
+          <EmptyState label="Wallet not connected">Connect your wallet to see your bids.</EmptyState>
         ) : !CONTRACTS_DEPLOYED ? (
-          <div style={{ padding: "12px 16px", background: "rgba(240,168,64,0.1)", border: "1px solid #f0a840", fontSize: 13, color: "#f0a840" }}>
-            UmbraAuction not deployed yet.
+          <div className="border border-warning bg-warning/10 p-6">
+            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-warning">Not deployed</span>
+            <p className="mt-3 font-mono text-xs text-warning/90 leading-relaxed">UmbraAuction not deployed yet.</p>
           </div>
         ) : auctions.length === 0 ? (
-          <div style={{ padding: 48, textAlign: "center", background: PANEL, border: `1px solid ${BORDER}`, color: MUTED }}>
-            No bids yet. <Link href="/auctions" style={{ color: PURPLE }}>Browse auctions →</Link>
-          </div>
+          <EmptyState label="No bids yet">
+            <Link href="/auctions" className="text-accent hover:underline underline-offset-4">
+              Browse auctions &rarr;
+            </Link>
+          </EmptyState>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div className="grid gap-6 md:grid-cols-2 md:gap-8">
             {auctions.map((a) => (
-              <Link key={a.id.toString()} href={`/auctions/${a.id.toString()}`} style={{
-                display: "block", padding: "22px 24px", background: PANEL, border: `1px solid ${BORDER}`, textDecoration: "none",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+              <Link
+                key={a.id.toString()}
+                href={`/auctions/${a.id.toString()}`}
+                className="group relative flex h-full flex-col bg-card border border-border/50 p-8 transition-all duration-500 hover:-translate-y-1 hover:border-accent/60"
+              >
+                <div className="mb-8 flex items-baseline justify-between gap-4">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                    No. {a.id.toString().padStart(2, "0")}
+                  </span>
+                  <span className={`inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest ${statusClass(a, address)}`}>
+                    <span className="w-1.5 h-1.5 bg-current" aria-hidden="true" />
+                    {statusLabel(a, address)}
+                  </span>
+                </div>
+
+                <h2 className="font-sans font-black text-4xl tracking-tight group-hover:text-accent transition-colors duration-300">
+                  {a.itemName || `Auction #${a.id.toString()}`}
+                </h2>
+
+                <div className="mt-4 mb-6 w-12 h-px bg-accent/60 group-hover:w-full transition-all duration-500" />
+
+                <p className="font-mono text-xs text-muted-foreground leading-relaxed">
+                  Seller {a.seller.slice(0, 6)}&hellip;{a.seller.slice(-4)}
+                </p>
+
+                <div className="mt-8 flex flex-wrap items-end gap-10 border-t border-border/30 pt-6">
                   <div>
-                    <div style={{ fontFamily: "var(--font-outfit), sans-serif", fontSize: 20, fontWeight: 800, color: TEXT }}>
-                      {a.itemName || `Auction #${a.id.toString()}`}
+                    <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                      You escrowed
                     </div>
-                    <div style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>Seller {a.seller.slice(0, 6)}…{a.seller.slice(-4)}</div>
+                    <div className="mt-2 font-sans font-black text-xl tracking-tight">
+                      {Number(formatUnits(a.bidCap, 6)).toLocaleString()}{" "}
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">FXRP</span>
+                    </div>
                   </div>
-                  <div style={{ display: "flex", gap: 24, fontSize: 12, color: MUTED, flexWrap: "wrap", alignItems: "center" }}>
+
+                  {a.status === 2 && (
                     <div>
-                      <div style={{ textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 10 }}>Bid cap</div>
-                      <div style={{ color: TEXT, fontWeight: 700 }}>{Number(formatUnits(a.bidCap, 6)).toLocaleString()} FXRP</div>
-                    </div>
-                    {a.status === 2 && (
-                      <div>
-                        <div style={{ textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 10 }}>Clearing price</div>
-                        <div style={{ color: TEXT, fontWeight: 700 }}>{Number(formatUnits(a.clearingPrice, 6)).toLocaleString()} FXRP</div>
+                      <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+                        Cleared at
                       </div>
-                    )}
-                    <div>
-                      <div style={{ textTransform: "uppercase", letterSpacing: "0.06em", fontSize: 10 }}>Status</div>
-                      <div style={{ color: statusColor(a, address), fontWeight: 700 }}>{statusLabel(a, address)}</div>
+                      <div className="mt-2 font-sans font-black text-xl tracking-tight">
+                        {Number(formatUnits(a.clearingPrice, 6)).toLocaleString()}{" "}
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">FXRP</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
+                </div>
+
+                <div
+                  className="pointer-events-none absolute top-0 right-0 w-12 h-12 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  aria-hidden="true"
+                >
+                  <div className="absolute top-0 right-0 w-full h-px bg-accent" />
+                  <div className="absolute top-0 right-0 w-px h-full bg-accent" />
                 </div>
               </Link>
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
