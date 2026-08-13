@@ -1,0 +1,175 @@
+// ── Network switch ──────────────────────────────────────────────────────────
+// "local"   — anvil forking Coston2 (`anvil --fork-url https://coston2-api.flare.network/ext/C/rpc`).
+// "coston2" — the real Flare Testnet Coston2. Flip once UmbraAuction is
+//             actually deployed there and fill in its address below.
+export const NETWORK: "local" | "coston2" = "local";
+
+export const RPC_URL = NETWORK === "local"
+  ? "http://127.0.0.1:8546"
+  : "https://coston2-api.flare.network/ext/C/rpc";
+
+export const AUCTION_ADDRESS = (
+  NETWORK === "local"
+    ? "0x0000000000000000000000000000000000000000" // filled in after local deploy
+    : "0x0000000000000000000000000000000000000000" // TODO: fill in after deploying to real Coston2
+) as `0x${string}`;
+
+export const FXRP_ADDRESS = (
+  NETWORK === "local"
+    ? "0x0000000000000000000000000000000000000000" // local MockFXRP — filled in after local deploy
+    : "0x0b6A3645c240605887a5532109323A3E12273dc7" // real FTestXRP on Coston2
+) as `0x${string}`;
+
+export const CONTRACTS_DEPLOYED =
+  AUCTION_ADDRESS !== "0x0000000000000000000000000000000000000000";
+
+export const AUCTION_ABI = [
+  {
+    type: "function", name: "createAuction",
+    inputs: [
+      { name: "itemName", type: "string" },
+      { name: "itemDescription", type: "string" },
+      { name: "bidCap", type: "uint256" },
+      { name: "duration", type: "uint256" },
+    ],
+    outputs: [{ name: "auctionId", type: "uint256" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function", name: "submitBid",
+    inputs: [
+      { name: "auctionId", type: "uint256" },
+      { name: "encryptedBid", type: "bytes" },
+    ],
+    outputs: [], stateMutability: "nonpayable",
+  },
+  {
+    type: "function", name: "closeAuction",
+    inputs: [{ name: "auctionId", type: "uint256" }],
+    outputs: [], stateMutability: "nonpayable",
+  },
+  {
+    type: "function", name: "settle",
+    inputs: [
+      { name: "auctionId", type: "uint256" },
+      { name: "winner", type: "address" },
+      { name: "clearingPrice", type: "uint256" },
+      { name: "signature", type: "bytes" },
+    ],
+    outputs: [], stateMutability: "nonpayable",
+  },
+  {
+    type: "function", name: "setTrustedTeeSigner",
+    inputs: [{ name: "_signer", type: "address" }],
+    outputs: [], stateMutability: "nonpayable",
+  },
+  {
+    type: "function", name: "trustedTeeSigner",
+    inputs: [], outputs: [{ name: "", type: "address" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function", name: "nextAuctionId",
+    inputs: [], outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function", name: "getAuction",
+    inputs: [{ name: "auctionId", type: "uint256" }],
+    outputs: [{
+      name: "", type: "tuple",
+      components: [
+        { name: "id", type: "uint256" },
+        { name: "seller", type: "address" },
+        { name: "itemName", type: "string" },
+        { name: "itemDescription", type: "string" },
+        { name: "bidCap", type: "uint256" },
+        { name: "endTime", type: "uint256" },
+        { name: "status", type: "uint8" },
+        { name: "winner", type: "address" },
+        { name: "clearingPrice", type: "uint256" },
+        { name: "bidCount", type: "uint256" },
+      ],
+    }],
+    stateMutability: "view",
+  },
+  {
+    type: "function", name: "getBidders",
+    inputs: [{ name: "auctionId", type: "uint256" }],
+    outputs: [{ name: "", type: "address[]" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function", name: "hasBid",
+    inputs: [
+      { name: "", type: "uint256" },
+      { name: "", type: "address" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "view",
+  },
+  {
+    type: "event", name: "AuctionCreated",
+    inputs: [
+      { name: "id", type: "uint256", indexed: true },
+      { name: "seller", type: "address", indexed: true },
+      { name: "bidCap", type: "uint256", indexed: false },
+      { name: "endTime", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    type: "event", name: "BidSubmitted",
+    inputs: [
+      { name: "id", type: "uint256", indexed: true },
+      { name: "bidder", type: "address", indexed: true },
+    ],
+  },
+  {
+    type: "event", name: "AuctionClosed",
+    inputs: [{ name: "id", type: "uint256", indexed: true }],
+  },
+  {
+    type: "event", name: "AuctionSettled",
+    inputs: [
+      { name: "id", type: "uint256", indexed: true },
+      { name: "winner", type: "address", indexed: true },
+      { name: "clearingPrice", type: "uint256", indexed: false },
+    ],
+  },
+] as const;
+
+export const ERC20_ABI = [
+  {
+    type: "function", name: "approve",
+    inputs: [
+      { name: "spender", type: "address" },
+      { name: "amount", type: "uint256" },
+    ],
+    outputs: [{ name: "", type: "bool" }],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function", name: "allowance",
+    inputs: [
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function", name: "balanceOf",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function", name: "decimals",
+    inputs: [], outputs: [{ name: "", type: "uint8" }],
+    stateMutability: "view",
+  },
+] as const;
+
+export const STATUS_FROM_ENUM: Record<number, "active" | "closed" | "settled"> = {
+  0: "active", 1: "closed", 2: "settled",
+};
