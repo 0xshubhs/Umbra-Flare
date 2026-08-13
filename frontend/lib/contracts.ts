@@ -10,13 +10,13 @@ export const RPC_URL = NETWORK === "local"
 
 export const AUCTION_ADDRESS = (
   NETWORK === "local"
-    ? "0x0000000000000000000000000000000000000000" // filled in after local deploy
+    ? "0x229e614Bc82229b423921Efdc4C6E498D7876BC1" // local deploy, contracts/script/Deploy.s.sol
     : "0x0000000000000000000000000000000000000000" // TODO: fill in after deploying to real Coston2
 ) as `0x${string}`;
 
 export const FXRP_ADDRESS = (
   NETWORK === "local"
-    ? "0x0000000000000000000000000000000000000000" // local MockFXRP — filled in after local deploy
+    ? "0x45A755B058492558351f188e4362F0546Bc3d140" // local MockFXRP — mint() freely, unlike the real token
     : "0x0b6A3645c240605887a5532109323A3E12273dc7" // real FTestXRP on Coston2
 ) as `0x${string}`;
 
