@@ -66,8 +66,27 @@ real XRP Ledger payment); calling its `mint()` directly reverts with
 auction contract is token-agnostic, so this is a constructor argument, not a
 code difference.
 
+## Testing
+
+- **Unit/integration:** `forge test` — 8/8 covering the full lifecycle, including
+  that a bidder's escrow is a fixed cap regardless of their real bid (so the
+  public escrow amount leaks nothing), that settlement rejects a forged
+  signature, and that the second price is charged rather than the winner's own bid.
+- **Live-chain:** `frontend/scripts/e2e-coston2.mjs` drives a complete round
+  against deployed Coston2 contracts and asserts the winner, the clearing
+  price, and all three payout balances. Two independent rounds have been run
+  and passed (auctions #1 and #2 on `0x9d3c…d697`).
+- **Known gap:** a sole bidder currently clears at 0, since there is no second
+  bid to price against. Fine for the mechanism, wrong for a real seller — a
+  reserve price is the fix, and it's first on the roadmap below.
+
 ## Roadmap
 
+- **Reserve price.** `createAuction` should take a floor below which the item
+  doesn't sell; today a lone bidder wins at 0. This is the one economic gap
+  between the current contract and something a seller could safely use.
 - Register a real TEE machine once indexer credentials are available; swap `trustedTeeSigner` to it — no other code changes needed
+- Settle in real FXRP once FAssets minting is practical for end users — a
+  constructor argument today, already exercised by `script/Deploy.s.sol`
 - English/ascending and first-price auction variants alongside Vickrey
-- Batch settlement + gas-compensation pool for whoever triggers `settle()` (see reference prior art in the space for the pattern)
+- Batch settlement + gas-compensation pool for whoever triggers `settle()`

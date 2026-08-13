@@ -117,6 +117,32 @@ plaintext amounts, and only the winner + clearing price are ever disclosed.
   #2 — swapping it from a demo key to the real registered TEE machine address
   is the entire production cutover, with no other code changes.
 
+## What is revealed, and what never is
+
+Settling a Vickrey auction necessarily discloses two things, and Umbra
+discloses exactly those and nothing else:
+
+| | |
+|---|---|
+| **Revealed on settlement** | the winner's address, and the clearing price |
+| **Never revealed** | the winner's own bid, and every bid below second place |
+
+Because the clearing price *is* the second-highest bid, the runner-up's exact
+amount becomes public. That's inherent to second-price mechanics — it's the
+number the winner pays — not a leak in the implementation. Everyone else's
+bid, including the winner's true valuation, stays private permanently.
+
+Two side channels are closed deliberately:
+
+- **Escrow amount.** Every bidder escrows the same fixed `bidCap`, never their
+  actual bid, so the public transfer reveals nothing about what they bid.
+- **Ciphertext length.** Bids are zero-padded to a fixed 32 bytes before
+  encryption, so every sealed bid is exactly 129 ciphertext bytes. Encoding
+  the amount at its natural width instead would have let anyone bucket a
+  rival's bid by magnitude just by measuring `getBidCiphertext()` — a 1 FXRP
+  bid and a 50,000 FXRP bid produce 100- and 102-byte ciphertexts. Constant
+  width removes that channel.
+
 ## What's built vs. what's a local stand-in
 
 **Built and real:**

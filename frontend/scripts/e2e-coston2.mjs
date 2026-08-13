@@ -68,10 +68,11 @@ async function send(acct, req) {
   if (r.status !== "success") throw new Error(`tx reverted: ${hash}`);
   return r;
 }
+// Must mirror lib/ecies.ts exactly, including the 32-byte zero padding that
+// keeps every sealed bid the same ciphertext length on-chain.
 function encryptBid(amount) {
-  let hex = amount.toString(16);
-  if (hex.length % 2) hex = "0" + hex;
-  return `0x${Buffer.from(encrypt(TEE_PUB, Buffer.from(hex, "hex"))).toString("hex")}`;
+  const plaintext = Buffer.from(amount.toString(16).padStart(64, "0"), "hex");
+  return `0x${Buffer.from(encrypt(TEE_PUB, plaintext)).toString("hex")}`;
 }
 
 const [kA, kB] = JSON.parse(fs.readFileSync(BIDDERS_FILE, "utf8"));
