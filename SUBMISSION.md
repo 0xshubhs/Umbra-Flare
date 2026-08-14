@@ -113,6 +113,14 @@ code difference.
 - **Reserve price.** `createAuction` should take a floor below which the item
   doesn't sell; today a lone bidder wins at 0. This is the one economic gap
   between the current contract and something a seller could safely use.
+- **Let the enclave close auctions itself.** `closeAuction()` is a pure
+  time-gated state flip with no secret and no computation, so it doesn't need
+  a separate transaction at all: `settle()` can accept an auction whose
+  `endTime` has passed and go straight to settled. Safe, because `submitBid`
+  requires `block.timestamp < endTime` while settlement requires `>=`, so the
+  bid set is final the instant the clock runs out. Further out, a registered
+  FCC extension can watch for ended auctions and emit the signed result
+  unprompted — nobody triggers anything, and the two on-chain steps become one.
 - Register a real TEE machine once indexer credentials are available; swap `trustedTeeSigner` to it — no other code changes needed
 - Settle in real FXRP once FAssets minting is practical for end users — a
   constructor argument today, already exercised by `script/Deploy.s.sol`

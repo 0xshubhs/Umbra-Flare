@@ -1,9 +1,19 @@
 import { NextResponse } from "next/server";
 import { privateKeyToAccount } from "viem/accounts";
-import { createPublicClient, encodeAbiParameters, fallback, http, keccak256, parseAbiParameters } from "viem";
+import {
+  createPublicClient, createWalletClient, defineChain, encodeAbiParameters,
+  fallback, http, keccak256, parseAbiParameters,
+} from "viem";
 import { decrypt } from "eciesjs";
 import { computeVickrey, type BidRecord } from "../_vickrey";
 import { AUCTION_ABI, AUCTION_ADDRESS, RPC_FALLBACKS } from "../../../../lib/contracts";
+
+const coston2 = defineChain({
+  id: 114,
+  name: "Coston2",
+  nativeCurrency: { decimals: 18, name: "C2FLR", symbol: "C2FLR" },
+  rpcUrls: { default: { http: [RPC_FALLBACKS[0]] } },
+});
 
 const TEE_SIMULATOR_PRIVATE_KEY = process.env.TEE_SIMULATOR_PRIVATE_KEY as `0x${string}` | undefined;
 
@@ -38,6 +48,7 @@ export async function POST(req: Request) {
       transport: fallback(RPC_FALLBACKS.map((url) => http(url)), { rank: false }),
     });
     const id = BigInt(auctionId);
+    const account = privateKeyToAccount(TEE_SIMULATOR_PRIVATE_KEY);
 
     const bidders = (await client.readContract({
       address: AUCTION_ADDRESS, abi: AUCTION_ABI, functionName: "getBidders", args: [id],
@@ -45,6 +56,35 @@ export async function POST(req: Request) {
 
     if (bidders.length === 0) {
       return NextResponse.json({ error: `no bids on auction ${auctionId}` }, { status: 400 });
+    }
+
+    // closeAuction() is a pure time-gated state flip — no secret, no
+    // computation, and permissionless — so the enclave can perform it itself
+    // rather than making a bidder send a separate transaction first. The
+    // contract still enforces that endTime has passed, so this can only ever
+    // do what anyone else could have done at the same moment.
+    const auction = (await client.readContract({
+      address: AUCTION_ADDRESS, abi: AUCTION_ABI, functionName: "getAuction", args: [id],
+    })) as { status: number; endTime: bigint };
+
+    let closedByTee = false;
+    if (auction.status === 0) {
+      const now = BigInt(Math.floor(Date.now() / 1000));
+      if (now < auction.endTime) {
+        return NextResponse.json(
+          { error: `auction ${auctionId} is still accepting bids` },
+          { status: 400 }
+        );
+      }
+      const wallet = createWalletClient({
+        account, chain: coston2,
+        transport: fallback(RPC_FALLBACKS.map((url) => http(url)), { rank: false }),
+      });
+      const hash = await wallet.writeContract({
+        address: AUCTION_ADDRESS, abi: AUCTION_ABI, functionName: "closeAuction", args: [id],
+      });
+      await client.waitForTransactionReceipt({ hash });
+      closedByTee = true;
     }
 
     const records: BidRecord[] = [];
@@ -68,10 +108,10 @@ export async function POST(req: Request) {
     );
     const digest = keccak256(packed);
 
-    const account = privateKeyToAccount(TEE_SIMULATOR_PRIVATE_KEY);
     const signature = await account.signMessage({ message: { raw: digest } });
 
     return NextResponse.json({
+      closedByTee,
       winner,
       clearingPrice: clearingPrice.toString(),
       bidsConsidered: records.length,
