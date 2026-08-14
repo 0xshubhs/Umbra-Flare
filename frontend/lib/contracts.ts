@@ -52,6 +52,15 @@ export const explorerAddress = (addr: string): string | null =>
 export const explorerTx = (hash: string): string | null =>
   EXPLORER_URL ? `${EXPLORER_URL}/tx/${hash}` : null;
 
+/// Auctions created solely to verify the contracts against live Coston2 —
+/// each one settled correctly and is recorded in SUBMISSION.md with its
+/// transaction hash, but they are engineering artefacts rather than listings,
+/// so the UI omits them. Matched by id rather than by name: filtering on a
+/// word like "test" would silently swallow a real auction someone names that.
+export const HIDDEN_AUCTION_IDS: ReadonlySet<string> = new Set(
+  NETWORK === "coston2" ? ["1", "2", "3", "6", "8"] : []
+);
+
 export const CONTRACTS_DEPLOYED =
   AUCTION_ADDRESS !== "0x0000000000000000000000000000000000000000";
 

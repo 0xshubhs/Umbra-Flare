@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { formatUnits } from "viem";
 import { SideNav } from "@/components/SideNav";
-import { AUCTION_ADDRESS, AUCTION_ABI, CONTRACTS_DEPLOYED } from "@/lib/contracts";
+import { AUCTION_ADDRESS, AUCTION_ABI, CONTRACTS_DEPLOYED, HIDDEN_AUCTION_IDS } from "@/lib/contracts";
 
 type Auction = {
   id: bigint; seller: `0x${string}`; itemName: string; itemDescription: string;
@@ -38,6 +38,7 @@ function useMyBids(address: `0x${string}` | undefined) {
   return (auctionResults ?? [])
     .map((r) => r.result as Auction | undefined)
     .filter((a): a is Auction => !!a)
+    .filter((a) => !HIDDEN_AUCTION_IDS.has(a.id.toString()))
     .reverse();
 }
 

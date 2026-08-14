@@ -1,11 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useReadContract, useReadContracts } from "wagmi";
 import { formatUnits } from "viem";
 import { SideNav } from "@/components/SideNav";
 import { TestFunds } from "@/components/TestFunds";
-import { AUCTION_ADDRESS, AUCTION_ABI, CONTRACTS_DEPLOYED, STATUS_FROM_ENUM } from "@/lib/contracts";
+import { AUCTION_ADDRESS, AUCTION_ABI, CONTRACTS_DEPLOYED, HIDDEN_AUCTION_IDS, STATUS_FROM_ENUM } from "@/lib/contracts";
 
 type Auction = {
   id: bigint; seller: `0x${string}`; itemName: string; itemDescription: string;
@@ -32,6 +33,7 @@ function useAuctions() {
   const auctions: Auction[] = (results ?? [])
     .map((r) => r.result as Auction | undefined)
     .filter((a): a is Auction => !!a)
+    .filter((a) => !HIDDEN_AUCTION_IDS.has(a.id.toString()))
     .reverse();
 
   return auctions;
@@ -42,8 +44,34 @@ function statusLabel(status: number, endTime: bigint) {
   return { 0: "Active", 1: "Closed", 2: "Settled" }[status] ?? "Unknown";
 }
 
+type Phase = "live" | "ended" | "settled";
+
+/// An auction still taking bids is "live"; one past its end time but not yet
+/// paid out is "ended", whether or not the close transaction has landed.
+function phase(a: Auction): Phase {
+  if (a.status === 2) return "settled";
+  if (a.status === 1) return "ended";
+  return BigInt(Math.floor(Date.now() / 1000)) >= a.endTime ? "ended" : "live";
+}
+
+const TABS: { value: Phase | "all"; label: string }[] = [
+  { value: "live", label: "Live" },
+  { value: "ended", label: "Ended" },
+  { value: "settled", label: "Settled" },
+  { value: "all", label: "All" },
+];
+
 export default function AuctionsPage() {
   const auctions = useAuctions();
+  // Defaults to Live so the auctions a visitor can actually bid on lead;
+  // settled rounds stay one click away as a record of completed sales.
+  const [tab, setTab] = useState<Phase | "all">("live");
+
+  const counts = auctions.reduce<Record<string, number>>((acc, a) => {
+    acc[phase(a)] = (acc[phase(a)] ?? 0) + 1;
+    return acc;
+  }, {});
+  const shown = tab === "all" ? auctions : auctions.filter((a) => phase(a) === tab);
 
   return (
     <main className="relative min-h-screen bg-background text-foreground">
@@ -74,6 +102,28 @@ export default function AuctionsPage() {
 
         <TestFunds />
 
+        {CONTRACTS_DEPLOYED && auctions.length > 0 && (
+          <div className="mb-8 flex flex-wrap gap-2 font-mono text-[10px] uppercase tracking-[0.2em]">
+            {TABS.map(({ value, label }) => {
+              const n = value === "all" ? auctions.length : counts[value] ?? 0;
+              const active = tab === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => setTab(value)}
+                  className={`border px-4 py-2 transition-colors duration-300 ${
+                    active
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border/50 text-muted-foreground hover:border-accent/60 hover:text-accent"
+                  }`}
+                >
+                  {label} <span className={active ? "opacity-70" : "opacity-50"}>{n}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {!CONTRACTS_DEPLOYED ? (
           <div className="border border-warning bg-warning/10 p-6">
             <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-warning">Not deployed</span>
@@ -82,21 +132,21 @@ export default function AuctionsPage() {
               <code className="font-mono text-warning">lib/contracts.ts</code>.
             </p>
           </div>
-        ) : auctions.length === 0 ? (
+        ) : shown.length === 0 ? (
           <div className="bg-card border border-border/50 p-12 md:p-20 text-center">
             <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
-              No auctions yet
+              {auctions.length === 0 ? "No auctions yet" : `No ${tab} auctions`}
             </span>
             <div className="mx-auto mt-6 mb-6 w-12 h-px bg-accent/60" />
             <p className="font-mono text-xs text-muted-foreground leading-relaxed">
               <Link href="/auctions/new" className="text-accent hover:underline underline-offset-4">
-                Create the first one &rarr;
+                Create one &rarr;
               </Link>
             </p>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 md:gap-8">
-            {auctions.map((a) => (
+            {shown.map((a) => (
               <Link
                 key={a.id.toString()}
                 href={`/auctions/${a.id.toString()}`}
