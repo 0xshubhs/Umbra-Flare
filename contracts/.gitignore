@@ -3,3 +3,6 @@ cache/
 lib/
 node_modules/
 .env
+
+# 0xTools generated signatures
+signatures/
