@@ -38,7 +38,7 @@ eight of those properties against the live chain.
 
 ## GitHub
 
-https://github.com/ayushsingh82/Umbra-Flare
+https://github.com/0xshubhs/Umbra-Flare
 
 ## How it uses Flare
 
