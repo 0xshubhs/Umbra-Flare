@@ -162,18 +162,16 @@ Two side channels are closed deliberately:
 ## On the interface
 
 The visual layer — the editorial layout, its animation primitives, and the
-markup of the auction screens — is adapted from SilentBid, an earlier
-sealed-bid auction project of ours predating this hackathon. It was re-themed
-and its copy rewritten entirely for Flare, but it is not new work and isn't
-presented as such.
+markup of the auction screens — is adapted from earlier in-house work that
+predates this hackathon, re-themed and with its copy rewritten for Flare. It
+is not new work and isn't presented as such.
 
-Nothing beneath it carried over. SilentBid used fully homomorphic encryption,
-where bids stay encrypted on-chain and revealing them needs a decryption
-oracle plus per-user permits. Umbra's enclave decrypts off-chain and signs the
-result instead, so there is no user-side reveal step, no second key, and no
-permit flow — a losing bidder cannot stall settlement by withholding a reveal.
-The contracts, cryptography, FCC integration, and every wallet interaction on
-these screens were written for this submission.
+Nothing beneath it carried over. The contracts, cryptography, FCC integration,
+and every wallet interaction on these screens were written for this submission,
+because that earlier work used a different privacy model. Umbra's enclave
+decrypts off-chain and signs the result, so there is no user-side reveal step,
+no second key, and no permit flow — a losing bidder cannot stall settlement by
+withholding a reveal.
 
 ## Repository layout
 

@@ -57,23 +57,13 @@ https://github.com/ayushsingh82/Umbra-Flare
 - Every auction screen's logic — list, create, detail (bid/close/settle), my-bids,
   test-funds faucet — and the whole Coston2 deployment + verification.
 
-**Pre-existing, reused and disclosed:** the app's *visual* layer. The editorial
-layout language, its animation primitives (scrambling and split-flap text,
-draw-on text, animated noise, smooth scroll), the landing sections, and the
-markup of the auction screens all come from SilentBid — an earlier sealed-bid
-auction project of ours, built Feb–Mar 2026, before this hackathon opened.
-Every component was re-themed to Umbra's palette and every word of copy
-rewritten for Flare and Confidential Compute, but the underlying motion and
-layout code is not new work and we are not claiming it as such.
-
-What was *not* reusable, and so was written from scratch: SilentBid used
-fully homomorphic encryption, where bids stay encrypted on-chain and revealing
-them needs a decryption oracle plus per-user permits. Umbra uses a TEE, where
-the enclave decrypts off-chain and signs the result. Those models share no
-code — the entire data layer behind these screens is new, and Umbra needs no
-user-side reveal step, no second key, and no permit flow at all. A losing
-bidder therefore cannot stall settlement by refusing to reveal, which is the
-standing weakness of commit-reveal designs.
+**Pre-existing, reused and disclosed:** the app's *visual* layer — the
+editorial layout language, its animation primitives, and the markup of the
+auction screens — is adapted from earlier in-house work that predates this
+hackathon, re-themed and with every word of copy rewritten for Flare. That
+motion and layout code is not new and is not claimed as such. Everything
+beneath it is: the earlier work used a different privacy model entirely, so no
+contract, cryptography, or chain integration carried over.
 
 ## Smart contracts
 

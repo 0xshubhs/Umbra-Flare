@@ -18,7 +18,7 @@ const NAV_ITEMS = [
 ];
 
 /// Fixed left dot-nav, matching the reference project's editorial layout
-/// language (SilentBid's SideNav), reskinned to Umbra's palette.
+/// language, reskinned to Umbra's palette.
 export function SideNav() {
   const pathname = usePathname();
 

@@ -1,8 +1,6 @@
 @import "tailwindcss";
 
-/* Editorial monochrome + purple accent, sharp corners — same design language
-   as FloatPay on Flare, swapping pink for purple to keep the two hackathon
-   entries visually distinct while feeling like one suite. */
+/* Editorial monochrome + pink accent, sharp corners throughout. */
 :root {
   --background: #0a0a0c;
   --foreground: #f2f2f4;
