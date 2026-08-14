@@ -41,8 +41,8 @@ Blockchain / Platform technology — Confidential Compute Apps
 
 ## Links
 
-- **GitHub:** `https://github.com/ayushsingh82/Umbra-Flare`
-- **Project website:** *(Vercel URL once deployed — otherwise leave blank)*
+- **GitHub:** `https://github.com/0xshubhs/Umbra-Flare`
+- **Project website:** `https://umbraaaaa.vercel.app`
 - **Demo video:** *(optional — leave blank if not recorded)*
 - **Social links:** *(at least one required — your own X/Twitter or similar)*
 

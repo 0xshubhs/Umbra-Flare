@@ -12,7 +12,10 @@ Anyone running a sealed-bid sale where bid privacy matters for the mechanism to 
 
 ## Demo
 
-- App: [fill in deployed URL]
+- **App: https://umbraaaaa.vercel.app** — live, connected to the deployed
+  Coston2 contracts. Auctions #4, #5, #9 and #10 are open to bid on; there's a
+  faucet button on any auction page for test FXRP, and C2FLR gas comes from
+  https://faucet.flare.network/coston2
 - Local: `cd frontend && npm install && npm run dev`, browse `/auctions`, create one at `/auctions/new`
 
 **Verified end-to-end on live Coston2**, not just locally. Auction #1 on
