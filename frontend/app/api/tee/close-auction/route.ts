@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { privateKeyToAccount } from "viem/accounts";
-import { createPublicClient, encodeAbiParameters, http, keccak256, parseAbiParameters } from "viem";
+import { createPublicClient, encodeAbiParameters, fallback, http, keccak256, parseAbiParameters } from "viem";
 import { decrypt } from "eciesjs";
 import { computeVickrey, type BidRecord } from "../_vickrey";
-import { AUCTION_ABI, AUCTION_ADDRESS, RPC_URL } from "../../../../lib/contracts";
+import { AUCTION_ABI, AUCTION_ADDRESS, RPC_FALLBACKS } from "../../../../lib/contracts";
 
 const TEE_SIMULATOR_PRIVATE_KEY = process.env.TEE_SIMULATOR_PRIVATE_KEY as `0x${string}` | undefined;
 
@@ -32,7 +32,11 @@ export async function POST(req: Request) {
   }
 
   try {
-    const client = createPublicClient({ transport: http(RPC_URL) });
+    // fallback() rotates to the next endpoint when one errors or rate-limits,
+    // so a throttled public RPC can't strand an auction mid-settlement.
+    const client = createPublicClient({
+      transport: fallback(RPC_FALLBACKS.map((url) => http(url)), { rank: false }),
+    });
     const id = BigInt(auctionId);
 
     const bidders = (await client.readContract({

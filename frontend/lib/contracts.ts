@@ -32,6 +32,18 @@ export const AUCTION_ADDRESS = CONFIG[NETWORK].auction as `0x${string}`;
 export const FXRP_ADDRESS = CONFIG[NETWORK].fxrp as `0x${string}`;
 export const EXPLORER_URL: string = CONFIG[NETWORK].explorer;
 
+/// Read endpoints tried in order. Flare's public Coston2 RPC rate-limits under
+/// load, which would otherwise fail settlement at exactly the wrong moment, so
+/// server-side reads fall back to independent providers on the same chain.
+export const RPC_FALLBACKS: readonly string[] =
+  NETWORK === "coston2"
+    ? [
+        CONFIG.coston2.rpc,
+        "https://rpc.ankr.com/flare_coston2",
+        "https://coston2.enosys.global/ext/C/rpc",
+      ]
+    : [CONFIG.local.rpc];
+
 /// Blockscout links. Return null on networks with no explorer (anvil), so
 /// callers can omit the link rather than render a dead one.
 export const explorerAddress = (addr: string): string | null =>
