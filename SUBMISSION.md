@@ -79,11 +79,13 @@ are **source-verified on Blockscout** — the code is readable on the explorer:
 | `MockFXRP` (demo settlement token) | [`0x08a25a794639a6cA03b0A7C655B2c36d82fF144a`](https://coston2-explorer.flare.network/address/0x08a25a794639a6cA03b0A7C655B2c36d82fF144a) ✓ verified |
 | `trustedTeeSigner` | `0xE3Dc334a8689FCFC5e9A7590A7651768630b626D` |
 
-**Two auctions are open for judges to bid on** (#4 Vintage Rolex Submariner,
-#5 Rare Whisky Cask No. 42), running through the judging window. The app has a
-built-in faucet button for test FXRP, and C2FLR for gas comes from
-https://faucet.flare.network/coston2. Auctions #1–#3 are settled and show the
-completed flow with real winners and clearing prices.
+**Four auctions are open for judges to bid on** — #4 Vintage Rolex Submariner,
+#5 Rare Whisky Cask No. 42, #9 Signed First Edition, #10 Series A Allocation —
+all running past the judging window. The app has a built-in faucet button for
+test FXRP, and C2FLR for gas comes from https://faucet.flare.network/coston2.
+
+The enclave also holds a gas balance of its own
+(`0xE3Dc…626D`), because it closes ended auctions itself — see Testing below.
 
 **On the settlement token:** the auction is designed for real FXRP and
 `script/Deploy.s.sol` deploys against FTestXRP
@@ -103,10 +105,18 @@ code difference.
   signature, and that the second price is charged rather than the winner's own bid.
 - **Live-chain:** `frontend/scripts/e2e-coston2.mjs` drives a complete round
   against deployed Coston2 contracts and asserts the winner, the clearing
-  price, and all three payout balances. Four independent rounds have been run
-  and passed (auctions #1, #2, #3 and #6 on `0x9d3c…d697`) — including one
+  price, and all three payout balances. Five independent rounds have been run
+  and passed (auctions #1, #2, #3, #6 and #8 on `0x9d3c…d697`) — including one
   after the constant-width ciphertext change and one after the full UI port,
   each re-verified rather than assumed.
+- **The enclave closes auctions itself.** `closeAuction()` is a pure
+  time-gated state flip — no secret, no computation, and permissionless — so
+  the TEE performs it rather than making a bidder send a separate transaction
+  first. Verified on auction #8: the route returned `closedByTee: true`, the
+  auction moved to `Closed` on-chain with no user transaction, and the TEE's
+  own balance paid the gas. It cannot close early; the contract enforces
+  `endTime` regardless, so the TEE can only ever do what any caller could do
+  at that moment.
 - **Known gap:** a sole bidder currently clears at 0, since there is no second
   bid to price against. Fine for the mechanism, wrong for a real seller — a
   reserve price is the fix, and it's first on the roadmap below.
@@ -116,12 +126,12 @@ code difference.
 - **Reserve price.** `createAuction` should take a floor below which the item
   doesn't sell; today a lone bidder wins at 0. This is the one economic gap
   between the current contract and something a seller could safely use.
-- **Let the enclave close auctions itself.** `closeAuction()` is a pure
-  time-gated state flip with no secret and no computation, so it doesn't need
-  a separate transaction at all: `settle()` can accept an auction whose
-  `endTime` has passed and go straight to settled. Safe, because `submitBid`
-  requires `block.timestamp < endTime` while settlement requires `>=`, so the
-  bid set is final the instant the clock runs out. Further out, a registered
+- **Collapse close into settle entirely.** The enclave already closes auctions
+  itself (see Testing), but that is still two on-chain transactions. `settle()`
+  could accept an auction whose `endTime` has passed and go straight to
+  settled — safe, because `submitBid` requires `block.timestamp < endTime`
+  while settlement requires `>=`, so the bid set is final the instant the
+  clock runs out. Further out, a registered
   FCC extension can watch for ended auctions and emit the signed result
   unprompted — nobody triggers anything, and the two on-chain steps become one.
 - Register a real TEE machine once indexer credentials are available; swap `trustedTeeSigner` to it — no other code changes needed
